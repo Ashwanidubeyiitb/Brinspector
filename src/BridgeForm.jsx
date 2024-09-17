@@ -28,6 +28,70 @@ const BridgeForm = () => {
     }));
   };
 
+  // Get min and max limits for distress types
+  const getDistressLimits = (distressType) => {
+    switch (distressType) {
+      case "Erosion":
+        return { min: 0, max: 100 }; // Erosion allowed between 0 and 100
+      case "Abrasion":
+        return { min: 0, max: 100 };
+      case "Scour":
+        return { min: 0, max: 2.0 };
+      case "Vegetation":
+        return { min: 0, max: 100 };
+      case "Deformations (deflection/tilt)":
+        return { min: 0, max: 100 };
+      case "Honeycombing":
+        return { min: 0, max: 100 };
+      case "Delamination":
+        return { min: 0, max: 100 };
+      case "Spalling":
+        return { min: 0, max: 100 };
+      case "Staining/Scaling/Leaching":
+        return { min: 0, max: 100 };
+      case "Rust":
+        return { min: 0, max: 100 };
+      case "Cracking (width)":
+        return { min: 0, max: 5 };
+      case "Exposed Reinforcement":
+        return { min: 0, max: 100 };
+      case "Corrosion (depth of pitting excluded)":
+        return { min: 0, max: 2 };
+      case "Reduction in Area of Reinforcement":
+        return { min: 0, max: 100 };
+      case "Section Loss":
+        return { min: 0, max: 100 };
+      case "Efflorescence":
+        return { min: 0, max: 100 };
+      case "Crushing":
+        return { min: 0, max: 100 };
+      case "Rutting":
+        return { min: 0, max: 100 };
+      case "Unevenness":
+        return { min: 0, max: 100 };
+      case "Degradation (wear and tear)":
+        return { min: 0, max: 100 };
+      case "Missing Elements":
+        return { min: 0, max: 20 };
+      case "Leaning/Bulging":
+        return { min: 0, max: 50 };
+      case "Pot Holes":
+        return { min: 0, max: 10 };
+      case "Loose Joints":
+        return { min: 0, max: 10 };
+      case "Undesired Restraints":
+        return { min: 0, max: 10 };
+      case "Marine Borers":
+        return { min: 0, max: 100 };
+      case "Inadequate Drainage":
+        return { min: 0, max: 10 };
+      case "Silting":
+        return { min: 0, max: 100 };
+      default:
+        return { min: 0, max: 100 }; // Default for undefined distress types
+    }
+  };
+
   // Handle input changes for distress values
   const handleInputChange = (componentIndex, subComponentIndex, distressIndex, value) => {
     const newFormData = { ...formData };
@@ -104,7 +168,6 @@ const BridgeForm = () => {
     const BHI = totalBHI / totalWeight || 1;
     return BHI;
   };
-  
 
   // Determine the condition state based on the distress type and input value
   const getConditionStateFromInput = (distressType, value) => {
@@ -169,7 +232,6 @@ const BridgeForm = () => {
         return 1; // Default to condition state 1 if no distress type match
     }
   };
-  
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -224,22 +286,26 @@ const BridgeForm = () => {
                   {/* Show input fields only if sub-component is expanded */}
                   {expandedSubComponents[`${componentIndex}-${subComponentIndex}`] && (
                     <div style={{ paddingLeft: '20px' }}>
-                      {subComponent.distressTypes.map((distress, distressIndex) => (
-                        <div key={distress.label} style={{ marginBottom: '10px' }}>
-                          <label>
-                            {distress.label} ({distress.unit}):{' '}
-                            <input
-                              type="number"
-                              min="0"
-                              value={distress.value || ''}
-                              onChange={(e) =>
-                                handleInputChange(componentIndex, subComponentIndex, distressIndex, e.target.value)
-                              }
-                              placeholder="Enter value"
-                            />
-                          </label>
-                        </div>
-                      ))}
+                      {subComponent.distressTypes.map((distress, distressIndex) => {
+                        const { min, max } = getDistressLimits(distress.label); // Get min and max limits for each distress type
+                        return (
+                          <div key={distress.label} style={{ marginBottom: '10px' }}>
+                            <label>
+                              {distress.label} ({distress.unit}):{' '}
+                              <input
+                                type="number"
+                                min={min}
+                                max={max}
+                                value={distress.value || ''}
+                                onChange={(e) =>
+                                  handleInputChange(componentIndex, subComponentIndex, distressIndex, e.target.value)
+                                }
+                                placeholder={`Enter value (${min}-${max})`}
+                              />
+                            </label>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

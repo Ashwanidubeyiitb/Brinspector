@@ -11,6 +11,7 @@ const App = () => {
         <Route path="/" element={<BridgeForm />} />
         {/* You can uncomment the following line when the Report component is ready */}
         <Route path="/report" element={<Report />} />
+        
         </Routes>
     </Router>
   );

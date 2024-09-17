@@ -13,12 +13,34 @@ const Report = () => {
     return null;
   }
 
+  // Function to determine condition state and star rating based on BHI
+  const getBridgeConditionAndRating = (BHI) => {
+    if (BHI < 20) {
+      return { condition: 'Critical', starRating: 'One' };
+    } else if (BHI >= 21 && BHI <= 40) {
+      return { condition: 'Poor', starRating: 'Two' };
+    } else if (BHI >= 41 && BHI <= 60) {
+      return { condition: 'Fair', starRating: 'Three' };
+    } else if (BHI >= 61 && BHI <= 80) {
+      return { condition: 'Good', starRating: 'Four' };
+    } else {
+      return { condition: 'Excellent', starRating: 'Five' };
+    }
+  };
+
+  // Get the condition state and star rating for the current BHI
+  const { condition, starRating } = getBridgeConditionAndRating(reportData.BHI);
+
   return (
     <div style={{ padding: '20px' }}>
       <h1>Bridge Condition Report</h1>
 
       {/* Display overall Bridge Health Index (BHI) */}
       <h2>Bridge Health Index (BHI): {reportData.BHI.toFixed(2)}</h2>
+
+      {/* Display Condition State and Bridge Star Rating */}
+      <h3>Condition state of Bridge: {condition}</h3>
+      <h3>Bridge Star Rating: {starRating}</h3>
 
       {/* Display details for each component */}
       {reportData.components.map((component) => (
