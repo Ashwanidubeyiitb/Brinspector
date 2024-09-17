@@ -188,7 +188,7 @@ const BridgeForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1>Bridge Rating System</h1>
+      <h1>Bridge Rating</h1>
 
       {/* Iterate over each component */}
       {formData.components.map((component, componentIndex) => (
