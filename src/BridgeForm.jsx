@@ -254,32 +254,47 @@ const BridgeForm = () => {
 
       {/* Iterate over each component */}
       {formData.components.map((component, componentIndex) => (
-        <div key={component.value} style={{ marginBottom: '20px' }}>
-          <h2>
-            {component.label}
-            <button
-              type="button"
-              onClick={() => toggleComponentExpand(componentIndex)}
-              style={{ marginLeft: '10px' }}
-            >
-              {expandedComponents[componentIndex] ? 'Collapse Component' : 'Expand Component'}
-            </button>
-          </h2>
+  <div key={component.value} style={{ paddingLeft: "20px" }}>
+    <h2 style={{ display: 'inline-block' }}>
+      {component.label}
+    </h2>
+    <button
+      type="button"
+      onClick={() => toggleComponentExpand(componentIndex)}
+      style={{
+
+        alignSelf: 'flex-end',
+        right: '0',          // Aligns the button to the right
+        bottom: '0',         // Aligns the button at the bottom of the header (subscript effect)
+        fontSize: '0.8em',   // Subscript effect by reducing font size
+        marginLeft: '10px',
+      }}
+    >
+      {expandedComponents[componentIndex] ? '-' : '+'}
+    </button>
 
           {/* Show sub-components if the component is expanded */}
           {expandedComponents[componentIndex] && (
-            <div style={{ paddingLeft: '20px' }}>
+            <div style={{ paddingLeft: '10px' }}>
               {/* Iterate over each sub-component */}
               {component.subComponents.map((subComponent, subComponentIndex) => (
-                <div key={subComponent.value} style={{ marginBottom: '15px' }}>
+                <div key={subComponent.value} style={{ marginBottom: '10px', position: "relative" }}>
                   <h3>
                     {subComponent.label}
                     <button
                       type="button"
                       onClick={() => toggleSubComponentExpand(componentIndex, subComponentIndex)}
-                      style={{ marginLeft: '10px' }}
+                      style={{
+
+                        alignSelf: 'flex-end',
+                        right: '0',          // Aligns the button to the right
+                        bottom: '0',         // Aligns the button at the bottom of the header (subscript effect)
+                        fontSize: '0.7em',   // Subscript effect by reducing font size
+                        marginLeft: '10px',
+                      }}
+                
                     >
-                      {expandedSubComponents[`${componentIndex}-${subComponentIndex}`] ? 'Collapse' : 'Expand'}
+                      {expandedSubComponents[`${componentIndex}-${subComponentIndex}`] ? '-' : '+'}
                     </button>
                   </h3>
 
@@ -301,6 +316,11 @@ const BridgeForm = () => {
                                   handleInputChange(componentIndex, subComponentIndex, distressIndex, e.target.value)
                                 }
                                 placeholder={`Enter value (${min}-${max})`}
+                                style={{
+                                  width: '150px', // Increased width for better usability
+                                  padding: '5px',  // Padding for better appearance
+                                  marginLeft: '10px', // Space between label and input    
+                                }}                  
                               />
                             </label>
                           </div>
