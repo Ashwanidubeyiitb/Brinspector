@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const Report = () => {
   const navigate = useNavigate();
-
+  const location = useLocation();
   // Retrieve the bridge report data from localStorage
   const reportData = JSON.parse(localStorage.getItem('bridgeReport'));
-
+  const projectInfo =  JSON.parse(localStorage.getItem('projectInfo')) || {};
   // If no report data exists, redirect back to the form
   if (!reportData) {
     navigate('/');
@@ -34,6 +35,36 @@ const Report = () => {
   return (
     <div style={{ padding: '20px' }}>
       <h1>Bridge Condition Report</h1>
+      {/* Project Information Section */}
+      <section>
+  <h2>Project Information</h2>
+  <table border="1" cellspacing="0" cellpadding="10">
+    <tr>
+      <td>Project Name</td>
+      <td>{projectInfo.projectName}</td>
+    </tr>
+    <tr>
+      <td>Client Name</td>
+      <td>{projectInfo.clientName}</td>
+    </tr>
+    <tr>
+      <td>Consultant Name</td>
+      <td>{projectInfo.consultantName}</td>
+    </tr>
+    <tr>
+      <td>Date of Inspection</td>
+      <td>{projectInfo.inspectionDate}</td>
+    </tr>
+    <tr>
+      <td>Popular Name</td>
+      <td>{projectInfo.popularName || 'N/A'}</td>
+    </tr>
+    <tr>
+      <td>Name of River/NH No.</td>
+      <td>{projectInfo.riverName}</td>
+    </tr>
+  </table>
+</section>
 
       {/* Display overall Bridge Health Index (BHI) */}
       <h2>Bridge Health Index (BHI): {reportData.BHI.toFixed(2)}</h2>
@@ -42,29 +73,8 @@ const Report = () => {
       <h3>Condition state of Bridge: {condition}</h3>
       <h3>Bridge Star Rating: {starRating}</h3>
 
-      {/* Display details for each component */}
-      {reportData.components.map((component) => (
-        <div key={component.value} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-          <h3>{component.label} (Weight: {component.weight}%)</h3>
-
-          {/* Display details for each sub-component */}
-          {component.subComponents.map((subComponent) => (
-            <div key={subComponent.value} style={{ marginLeft: '20px', marginBottom: '10px' }}>
-              <h4>{subComponent.label} (Weight: {subComponent.weight}%)</h4>
-
-              {/* Display distress types and their values */}
-              {subComponent.distressTypes.map((distress) => (
-                <p key={distress.label} style={{ marginLeft: '20px' }}>
-                  <strong>{distress.label}:</strong> {distress.value || 'Not provided'} {distress.unit}
-                </p>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
-
       {/* Button to go back to the form */}
-      <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px' }}>
+      <button onClick={() => navigate('/bridgeform')} style={{ marginTop: '20px', padding: '10px 20px' }}>
         Back to Form
       </button>
     </div>
