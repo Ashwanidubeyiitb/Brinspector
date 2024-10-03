@@ -25,7 +25,7 @@ const ProjectInfoForm = () => {
     e.preventDefault();
     // Store form data into localStorage to share between components
     localStorage.setItem('projectInfo', JSON.stringify(formData));
-    navigate('/bridgeform'); // Navigate to the bridge form page
+    navigate('/ImageUpload'); 
   };
 
   return (
@@ -39,7 +39,6 @@ const ProjectInfoForm = () => {
             name="projectName"
             value={formData.projectName}
             onChange={handleChange}
-            required
           />
         </label>
         <br />
@@ -50,7 +49,6 @@ const ProjectInfoForm = () => {
             name="clientName"
             value={formData.clientName}
             onChange={handleChange}
-            required
           />
         </label>
         <br />
@@ -61,7 +59,6 @@ const ProjectInfoForm = () => {
             name="consultantName"
             value={formData.consultantName}
             onChange={handleChange}
-            required
           />
         </label>
         <br />
@@ -72,7 +69,6 @@ const ProjectInfoForm = () => {
             name="inspectionDate"
             value={formData.inspectionDate}
             onChange={handleChange}
-            required
           />
         </label>
         <br />
@@ -93,7 +89,6 @@ const ProjectInfoForm = () => {
             name="riverName"
             value={formData.riverName}
             onChange={handleChange}
-            required
           />
         </label>
         <br />
