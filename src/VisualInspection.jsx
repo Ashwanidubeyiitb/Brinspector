@@ -32,43 +32,47 @@ const VisualInspection = () => {
 
   // PhotoUpload Component
   const PhotoUpload = ({ photos, setPhotos, label }) => {
+    const [photoCaptions, setPhotoCaptions] = useState(
+      photos.map((photo) => ({ id: photo.id, caption: photo.caption || '' }))
+    );
+  
     const handlePhotoChange = (e) => {
       const files = Array.from(e.target.files);
       const newPhotos = files.map((file) => ({
         id: Date.now() + Math.random(),
-        file: URL.createObjectURL(file), // Create a URL for preview
+        file: URL.createObjectURL(file),
         caption: '',
       }));
       setPhotos([...photos, ...newPhotos]);
+      setPhotoCaptions([...photoCaptions, ...newPhotos.map(() => ({ caption: '' }))]);
     };
   
-    const handleCaptionChange = (id, caption) => {
-      const updatedPhotos = photos.map((photo) => {
-        if (photo.id === id) {
-          return { ...photo, caption };
-        }
-        return photo;
-      });
-      setPhotos(updatedPhotos);
+    const handleCaptionChange = (id) => (event) => {
+      const updatedCaptions = photoCaptions.map((caption) =>
+        caption.id === id ? { ...caption, caption: event.target.value } : caption
+      );
+      setPhotoCaptions(updatedCaptions);
     };
   
     const removePhoto = (id) => {
-      const updatedPhotos = photos.filter(photo => photo.id !== id);
+      const updatedPhotos = photos.filter((photo) => photo.id !== id);
+      const updatedCaptions = photoCaptions.filter((caption) => caption.id !== id);
       setPhotos(updatedPhotos);
+      setPhotoCaptions(updatedCaptions);
     };
   
     return (
       <div>
         <h3>{label} Photos</h3>
-        <input type="file" multiple onChange={handlePhotoChange} />
+        <input type="file" multiple accept=".jpeg, .jpg" onChange={handlePhotoChange} />
         {photos && photos.map((photo) => (
           <div key={photo.id}>
             <img src={photo.file} alt="uploaded" style={{ width: '100px', height: '100px' }} />
             <input
               type="text"
               placeholder="Enter caption"
-              value={photo.caption}
-              onChange={(e) => handleCaptionChange(photo.id, e.target.value)}
+              value={photoCaptions.find((caption) => caption.id === photo.id).caption}
+              onChange={handleCaptionChange(photo.id)}
             />
             <button type="button" onClick={() => removePhoto(photo.id)}>Remove</button>
           </div>
@@ -83,18 +87,18 @@ const VisualInspection = () => {
     setSpans(updatedSpans);
   };
 
-  const addSubComponent = (spanIndex, name) => {
-    if (!name) return;
+  const addSubComponent = (spanIndex) => {
     const updatedSpans = [...spans];
     const newSubComponentId = updatedSpans[spanIndex].subComponents.length + 1;
     updatedSpans[spanIndex].subComponents.push({
       id: newSubComponentId,
-      name: name,
+      name: '', // Initialize with an empty name for direct input
       notes: '',
       photos: [],
     });
     setSpans(updatedSpans);
   };
+  
 
   const removeSubComponent = (spanIndex, subComponentIndex) => {
     const updatedSpans = [...spans];
@@ -102,9 +106,10 @@ const VisualInspection = () => {
     setSpans(updatedSpans);
   };
 
-  const handleSubComponentNoteChange = (e, spanIndex, subComponentIndex) => {
+  const handleSubComponentChange = (e, spanIndex, subComponentIndex, field) => {
+    const { value } = e.target;
     const updatedSpans = [...spans];
-    updatedSpans[spanIndex].subComponents[subComponentIndex].notes = e.target.value;
+    updatedSpans[spanIndex].subComponents[subComponentIndex][field] = value;
     setSpans(updatedSpans);
   };
 
@@ -186,7 +191,7 @@ const VisualInspection = () => {
                     
           {span.isOpen && (
             <div style={{ marginLeft: '20px' }}>
-              {index !== 0 && ( // Ensure that this block is not rendered for span 1 (index 0)
+              {numSpans > 1 && (
                 <div>
                   <h3>Pier {index + 1}</h3>
                   <textarea
@@ -348,38 +353,38 @@ const VisualInspection = () => {
               </div>
 
               <div>
-                <h3>Custom Components</h3>
-                {span.subComponents && span.subComponents.map((subComponent, subComponentIndex) => (
-                  <div key={subComponent.id} style={{ marginLeft: '20px' }}>
+                <h3>Custom Component</h3>
+                {span.subComponents.map((sub, subComponentIndex) => (
+                  <div key={sub.id}>
                     <input
                       type="text"
-                      placeholder="Custom Component Name"
-                      value={subComponent.name}
-                      onChange={(e) => handleSubComponentNoteChange(e, index, subComponentIndex)}
-                      style={{ width: '200px', marginRight: '10px' }}
+                      placeholder="Subcomponent Name"
+                      value={sub.name || ''}
+                      onChange={(e) => handleSubComponentChange(e, index, subComponentIndex, 'name')}
+                      style={{ width: '150px' }}
                     />
                     <textarea
-                      placeholder={`Notes for ${subComponent.name}`}
-                      value={subComponent.notes || ''}
-                      onChange={(e) => handleSubComponentNoteChange(e, index, subComponentIndex)}
+                      placeholder={`Enter notes for ${sub.name}`}
+                      value={sub.notes || ''}
+                      onChange={(e) => handleSubComponentChange(e, index, subComponentIndex, 'notes')}
                       style={{ width: '300px', height: '100px' }}
                     />
-                    <PhotoUpload photos={subComponent.photos} setPhotos={(photos) => {
+                    <PhotoUpload photos={sub.photos} setPhotos={(photos) => {
                       const updatedSpans = [...spans];
                       updatedSpans[index].subComponents[subComponentIndex].photos = photos;
                       setSpans(updatedSpans);
-                    }} label={subComponent.name} />
-                    <button type="button" onClick={() => removeSubComponent(index, subComponentIndex)}>Remove</button>
+                    }} label={sub.name || 'Subcomponent'} />
+                    <button type="button" onClick={() => removeSubComponent(index, subComponentIndex)}>Remove Subcomponent</button>
                   </div>
                 ))}
-                <button type="button" onClick={() => addSubComponent(index, prompt('Enter custom component name:'))}>Add Custom Component</button>
+                <button type="button" onClick={() => addSubComponent(index)}>Add Subcomponent</button>
               </div>
             </div>
           )}
         </div>
       ))}
 
-      <button type="submit">Submit</button>
+      <button type="Next">Submit</button>
     </form>
   );
 };

@@ -39,6 +39,16 @@ const Report = () => {
     return null;
   }
 
+  const [chainage, setChainage] = useState(null);
+  const [pdfFileUrl, setPdfFileUrl] = useState(null);
+  useEffect(() => {
+    const storedChainage = localStorage.getItem('chainage');
+    const storedPdfUrl = localStorage.getItem('pdfFileUrl');
+
+    if (storedChainage) setChainage(storedChainage);
+    if (storedPdfUrl) setPdfFileUrl(storedPdfUrl);
+  }, []);
+
   const convertObjectToArray = (data) => {
     let resultArray = [];
 
@@ -123,7 +133,19 @@ const reportArray = convertObjectToArray(formData);
       ))}
     </div>
   
-
+    <div>
+      <h2>CHAINAGE DATA</h2>
+      {chainage && pdfFileUrl ? (
+        <div>
+          <p>Structure Chainage: {chainage} km</p>
+          <p>
+            Drawing File: <a href={pdfFileUrl} target="_blank" rel="noopener noreferrer"style={{ color: 'black', textDecoration: 'underline' }}>View PDF</a>
+          </p>
+        </div>
+      ) : (
+        <p>No data available.</p>
+      )}
+    </div>
 
 
     <div>

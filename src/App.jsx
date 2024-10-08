@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProjectInfoForm from "./ProjectInfoForm";
 import ImageUpload from "../ImageUpload";
+import ChainageData from "./ChainageData";
 import ConditionSurveyForm from "./ConditionSurveyForm";
 import VisualInspection from "./VisualInspection"
 import BridgeForm from './BridgeForm';
@@ -16,6 +17,9 @@ const App = () => {
 
         {/* Image Upload Form Route */}
         <Route path="/ImageUpload" element={<ImageUpload />} />
+
+        {/* Chainage Data Form Route */}
+        <Route path="/ChainageData" element={<ChainageData />} />
 
         {/* Condition Survey Form Route */}
         <Route path="/ConditionSurveyForm" element={<ConditionSurveyForm />} />

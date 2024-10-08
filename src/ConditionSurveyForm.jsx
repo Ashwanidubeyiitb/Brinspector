@@ -127,7 +127,7 @@ const ConditionSurveyForm = () => {
           </div>
         ))}
         <button type="submit" style={{ padding: '10px 20px', fontSize: '16px' }}>
-          Submit
+          Next
         </button>
       </form>
     </div>

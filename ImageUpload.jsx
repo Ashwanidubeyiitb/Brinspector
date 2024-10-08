@@ -40,7 +40,7 @@ const ImageUpload = () => {
 
   const handleSubmit = () => {
     // Navigate to the Report component
-    navigate('/ConditionSurveyForm');
+    navigate('/ChainageData');
   };
 
   return (
@@ -67,7 +67,7 @@ const ImageUpload = () => {
           )}
         </div>
       ))}
-      <button onClick={handleSubmit}>Submit</button>
+      <button onClick={handleSubmit}>Next</button>
     </div>
   );
 };
