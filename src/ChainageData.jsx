@@ -5,13 +5,16 @@ const ChainageData = () => {
   const [chainage, setChainage] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const navigate = useNavigate();
+  const [selectedBridgeType, setSelectedBridgeType] = useState('');
+
+  const handleBridgeTypeChange = (event) => {
+    setSelectedBridgeType(event.target.value);
+  };
 
   const handleChainageChange = (event) => {
     const value = event.target.value;
-    // Regular expression to match decimal numbers
     const decimalPattern = /^\d*\.?\d*$/;
 
-    // Update only if the value matches the decimal pattern
     if (decimalPattern.test(value)) {
       setChainage(value);
     }
@@ -21,24 +24,32 @@ const ChainageData = () => {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
       const fileUrl = URL.createObjectURL(file);
-      localStorage.setItem('pdfFileUrl', fileUrl);
-      localStorage.setItem('chainage', chainage);
-      setPdfFile(file);
+      setPdfFile(fileUrl); // Save URL to state
     } else {
       alert('Please upload a valid PDF file.');
     }
   };
 
   const handleSubmit = () => {
-    localStorage.setItem('chainage', chainage);
-    navigate('/ConditionSurveyForm'); // Adjust this route as needed
+    // Create an object to hold all the data
+    const bridgeData = {
+      chainage,
+      bridgeType: selectedBridgeType,
+      pdfFileUrl: pdfFile || null, // Use null if no file is uploaded
+    };
+
+    // Store the object as a JSON string in local storage under a single key
+    localStorage.setItem('bridgeData', JSON.stringify(bridgeData));
+
+    // Navigate to the next form
+    navigate('/ConditionSurveyForm');
   };
 
   return (
     <div>
       <h2>Bridge Data</h2>
-      
-      <label>
+
+      <label style={{ marginBottom: '10px' }}>
         Structure Chainage (km):
         <input
           type="text"
@@ -50,7 +61,27 @@ const ChainageData = () => {
 
       <br />
 
-      <label>
+      <label style={{ marginBottom: '10px' }}>
+        Bridge Type:
+        <select value={selectedBridgeType} onChange={handleBridgeTypeChange}>
+          <option value="" disabled>Select structure type</option>
+          <option value="Interchange">Interchange</option>
+          <option value="Minor Bridge">Minor Bridge</option>
+          <option value="Major Bridge">Major Bridge</option>
+          <option value="VUP">VUP</option>
+          <option value="VOP">VOP</option>
+          <option value="LVUP">LVUP</option>
+          <option value="SVUP">SVUP</option>
+          <option value="ROB">ROB</option>
+          <option value="RUB">RUB</option>
+          <option value="CUP">CUP</option>
+          <option value="PUP">PUP</option>
+        </select>
+      </label>
+
+      <br />
+
+      <label style={{ marginBottom: '10px' }}>
         Import PDF File:
         <input
           type="file"
@@ -61,7 +92,7 @@ const ChainageData = () => {
 
       <br />
 
-      <button onClick={handleSubmit}>Next</button>
+      <button onClick={handleSubmit} style={{ marginTop: '10px' }}>Next</button>
     </div>
   );
 };

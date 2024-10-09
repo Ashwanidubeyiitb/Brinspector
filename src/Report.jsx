@@ -39,14 +39,14 @@ const Report = () => {
     return null;
   }
 
-  const [chainage, setChainage] = useState(null);
-  const [pdfFileUrl, setPdfFileUrl] = useState(null);
-  useEffect(() => {
-    const storedChainage = localStorage.getItem('chainage');
-    const storedPdfUrl = localStorage.getItem('pdfFileUrl');
+  const [bridgeData, setBridgeData] = useState(null);
 
-    if (storedChainage) setChainage(storedChainage);
-    if (storedPdfUrl) setPdfFileUrl(storedPdfUrl);
+  useEffect(() => {
+    // Retrieve and parse bridge data from local storage
+    const data = localStorage.getItem('bridgeData');
+    if (data) {
+      setBridgeData(JSON.parse(data));
+    }
   }, []);
 
   const convertObjectToArray = (data) => {
@@ -75,7 +75,6 @@ const Report = () => {
 
 // Convert report data
 const reportArray = convertObjectToArray(formData);
-
 
   // Function to determine condition state and star rating based on BHI
   const getBridgeConditionAndRating = (BHI) => {
@@ -134,16 +133,24 @@ const reportArray = convertObjectToArray(formData);
     </div>
   
     <div>
-      <h2>CHAINAGE DATA</h2>
-      {chainage && pdfFileUrl ? (
+      <h2>Bridge Report</h2>
+      {bridgeData ? (
         <div>
-          <p>Structure Chainage: {chainage} km</p>
-          <p>
-            Drawing File: <a href={pdfFileUrl} target="_blank" rel="noopener noreferrer"style={{ color: 'black', textDecoration: 'underline' }}>View PDF</a>
-          </p>
+          <p><strong>Structure Chainage (km):</strong> {bridgeData.chainage}</p>
+          <p><strong>Bridge Type:</strong> {bridgeData.bridgeType}</p>
+          {bridgeData.pdfFileUrl ? (
+            <p>
+              <strong>PDF File:</strong> 
+              <a href={bridgeData.pdfFileUrl} target="_blank" rel="noopener noreferrer">
+                View PDF
+              </a>
+            </p>
+          ) : (
+            <p><strong>PDF File:</strong> No file uploaded</p>
+          )}
         </div>
       ) : (
-        <p>No data available.</p>
+        <p>No bridge data available.</p>
       )}
     </div>
 

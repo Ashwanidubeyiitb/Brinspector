@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const VisualInspection = () => {
   const [numSpans, setNumSpans] = useState('');
   const [spans, setSpans] = useState([]);
   const navigate = useNavigate();
+
 
   const handleSpanChange = (e) => {
     const spansCount = Math.min(e.target.value, 500);
@@ -384,7 +385,7 @@ const VisualInspection = () => {
         </div>
       ))}
 
-      <button type="Next">Submit</button>
+      <button type="submit">Next</button>
     </form>
   );
 };
