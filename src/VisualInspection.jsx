@@ -147,7 +147,7 @@ const VisualInspection = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/bridgeform');
+    navigate('/bridgeratingform');
   };
 
   return (

@@ -28,16 +28,10 @@ const Report = () => {
   }, []);
 
   // Retrieve the bridge report data from localStorage
-  const reportData = JSON.parse(localStorage.getItem('bridgeReport'));
+  const ratingData = JSON.parse(localStorage.getItem('bridgeratingReport'));
   const projectInfo =  JSON.parse(localStorage.getItem('projectInfo')) || {};
   const storedData = localStorage.getItem('surveydata');
   const formData = storedData ? JSON.parse(storedData) : {};
-  
-  // If no report data exists, redirect back to the form
-  if (!reportData) {
-    navigate('/');
-    return null;
-  }
 
   const [bridgeData, setBridgeData] = useState(null);
 
@@ -92,7 +86,7 @@ const reportArray = convertObjectToArray(formData);
   };
 
   // Get the condition state and star rating for the current BHI
-  const { condition, starRating } = getBridgeConditionAndRating(reportData.BHI);
+  const { condition, starRating } = getBridgeConditionAndRating(ratingData.BHI);
 
   return (
     <div style={{ padding: '20px' }}>
@@ -133,7 +127,7 @@ const reportArray = convertObjectToArray(formData);
     </div>
   
     <div>
-      <h2>Bridge Report</h2>
+      <h2>BRIDGE DATA</h2>
       {bridgeData ? (
         <div>
           <p><strong>Structure Chainage (km):</strong> {bridgeData.chainage}</p>
@@ -188,14 +182,14 @@ const reportArray = convertObjectToArray(formData);
 
 
       {/* Display overall Bridge Health Index (BHI) */}
-      <h2>Bridge Health Index (BHI): {reportData.BHI.toFixed(2)}</h2>
+      <h2>Bridge Health Index (BHI): {ratingData.BHI.toFixed(2)}</h2>
 
       {/* Display Condition State and Bridge Star Rating */}
       <h3>Condition state of Bridge: {condition}</h3>
       <h3>Bridge Star Rating: {starRating}</h3>
 
       {/* Button to go back to the form */}
-      <button onClick={() => navigate('/bridgeform')} style={{ marginTop: '20px', padding: '10px 20px' }}>
+      <button onClick={() => navigate('/bridgeratingform')} style={{ marginTop: '20px', padding: '10px 20px' }}>
         Back to Form
       </button>
     </div>

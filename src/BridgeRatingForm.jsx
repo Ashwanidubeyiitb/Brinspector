@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bridgeData from './componentsData.json'; // Assume this is your JSON file for the bridge structure
 
-const BridgeForm = () => {
+const BridgeRatingForm = () => {
   const navigate = useNavigate();
   
   // Initialize state with bridge data
@@ -241,8 +241,8 @@ const BridgeForm = () => {
     const BHI = calculateBHI(formData);
 
     // Store the calculated BHI and form data into localStorage
-    const reportData = { ...formData, BHI };
-    localStorage.setItem('bridgeReport', JSON.stringify(reportData));
+    const ratingsData = { ...formData, BHI };
+    localStorage.setItem('bridgeratingReport', JSON.stringify(ratingsData));
 
     // Navigate to the report page
     navigate('/report');
@@ -340,4 +340,4 @@ const BridgeForm = () => {
   );
 };
 
-export default BridgeForm;
+export default BridgeRatingForm;

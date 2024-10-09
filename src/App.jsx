@@ -5,7 +5,7 @@ import ImageUpload from "../ImageUpload";
 import ChainageData from "./ChainageData";
 import ConditionSurveyForm from "./ConditionSurveyForm";
 import VisualInspection from "./VisualInspection"
-import BridgeForm from './BridgeForm';
+import BridgeRatingForm from './BridgeRatingForm';
 import Report from './Report';
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
         <Route path="/VisualInspection" element={<VisualInspection />} />
 
         {/* Bridge Form Route */}
-        <Route path="/bridgeform" element={<BridgeForm />} />
+        <Route path="/bridgeratingform" element={<BridgeRatingForm />} />
 
         {/* Report Route */}
         <Route path="/report" element={<Report />} />
