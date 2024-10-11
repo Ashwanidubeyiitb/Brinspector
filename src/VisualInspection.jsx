@@ -57,29 +57,35 @@ const VisualInspection = () => {
   };
 
   // Function to add a new girder
-  const addGirder = (spanNumber) => {
+  const addGirder = (spanNumber, componentName) => {
     setSpans((prevSpans) =>
-      prevSpans.map((span) =>
-        span.spanNumber === spanNumber
-          ? {
-              ...span,
-              subComponents: span.subComponents.map((subComp) =>
-                subComp.name === 'Girders'
-                  ? {
-                      ...subComp,
-                      girders: [
-                        ...subComp.girders,
-                        { name: `Girder ${subComp.girders.length + 1}`, photos: [] },
-                      ],
-                    }
-                  : subComp
-              ),
-            }
-          : span
-      )
-    );
-  };
-
+    prevSpans.map((span) =>
+      span.spanNumber === spanNumber
+        ? {
+            ...span,
+            subComponents: span.subComponents.map((subComp) =>
+              subComp.name === componentName
+                ? {
+                    ...subComp,
+                    girders: [
+                      ...subComp.girders,
+                      {
+                        name: componentName === 'Girders'
+                          ? `Girder ${subComp.girders.length + 1}`
+                          : componentName === 'Cross Girders'
+                          ? `Cross Girder ${subComp.girders.length + 1}`
+                          : '',
+                        photos: [],
+                      },
+                    ],
+                  }
+                : subComp
+            ),
+          }
+        : span
+    ));
+    };
+  
   // Function to add a new subcomponent
   const addSubComponent = (spanNumber) => {
     if (!newSubComponentName) return; // Prevent empty names
@@ -108,22 +114,24 @@ const VisualInspection = () => {
               ...span,
               subComponents: span.subComponents.map((subComp) => {
                 if (subComp.name === subComponentName) {
-                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
-                    // Handle adding photo to specific girder
-                    return {
-                      ...subComp,
-                      girders: subComp.girders.map((girder, index) =>
-                        index === girderIndex
-                          ? {
-                              ...girder,
-                              photos: [
-                                ...girder.photos,
-                                { image: URL.createObjectURL(photo), caption: '' },
-                              ],
-                            }
-                          : girder
-                      ),
-                    };
+                  if (subComp.name === 'Girders' || subComp.name === 'Cross Girders') {
+                    // Handle adding photo to specific girder or cross girder
+                    if (girderIndex !== undefined) {
+                      return {
+                        ...subComp,
+                        girders: subComp.girders.map((girder, index) =>
+                          index === girderIndex
+                            ? {
+                                ...girder,
+                                photos: [
+                                  ...girder.photos,
+                                  { image: URL.createObjectURL(photo), caption: '' },
+                                ],
+                              }
+                            : girder
+                        ),
+                      };
+                    }
                   } else {
                     // Handle adding photo to subcomponent
                     return {
@@ -141,42 +149,44 @@ const VisualInspection = () => {
           : span
       )
     );
-  };
+  };  
 
   // Function to remove a photo
   const removePhoto = (spanNumber, subComponentName, girderIndex, photoIndex) => {
-    setSpans((prevSpans) =>
-      prevSpans.map((span) =>
-        span.spanNumber === spanNumber
-          ? {
-              ...span,
-              subComponents: span.subComponents.map((subComp) => {
-                if (subComp.name === subComponentName) {
-                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
-                    // Handle removing photo from specific girder
+  setSpans((prevSpans) =>
+    prevSpans.map((span) =>
+      span.spanNumber === spanNumber
+        ? {
+            ...span,
+            subComponents: span.subComponents.map((subComp) => {
+              if (subComp.name === subComponentName) {
+                if (subComp.name === 'Girders' || subComp.name === 'Cross Girders') {
+                  // Handle removing photo from specific girder or cross girder
+                  if (girderIndex !== undefined) {
                     return {
                       ...subComp,
                       girders: subComp.girders.map((girder, index) =>
                         index === girderIndex
                           ? {
                               ...girder,
-                              photos: girder.photos.filter((_, index) => index !== photoIndex),
+                              photos: girder.photos.filter((_, idx) => idx !== photoIndex),
                             }
                           : girder
                       ),
                     };
-                  } else {
-                    // Handle removing photo from subcomponent
-                    return {
-                      ...subComp,
-                      photos: subComp.photos.filter((_, index) => index !== photoIndex),
-                    };
                   }
+                } else {
+                  // Handle removing photo from subcomponent
+                  return {
+                    ...subComp,
+                    photos: subComp.photos.filter((_, idx) => idx !== photoIndex),
+                  };
                 }
-                return subComp;
-              }),
-            }
-          : span
+              }
+              return subComp;
+            }),
+          }
+        : span
       )
     );
   };
@@ -193,7 +203,8 @@ const VisualInspection = () => {
                 : span
         )
     );
-};
+  };
+
   // Function to update caption for a photo
   const updateCaption = (spanNumber, subComponentName, girderIndex, photoIndex, caption) => {
     setSpans((prevSpans) =>
@@ -284,73 +295,135 @@ const VisualInspection = () => {
               <div>
                 {span.subComponents.map((subComp, subCompIndex) => (
                   <div key={subCompIndex}>
-                    <h4>{subComp.name}</h4>
-                    <textarea
-                      value={subComp.notes}
-                      placeholder={`Enter notes for ${subComp.name}`}
-                      onChange={(e) => updateNotes(span.spanNumber, subComp.name, e.target.value)}
-                      style={{ width: '100%', marginBottom: '10px' }}
-                    />
-                    {subComp.name === 'Girders' && (
-                      <>
-                        <button onClick={() => addGirder(span.spanNumber)}>Add Girder</button>
-                        {subComp.girders && subComp.girders.map((girder, girderIndex) => (
-                          <div key={girderIndex}>
-                            <h5>{girder.name}</h5>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) =>
-                                Array.from(e.target.files).forEach((file) =>
-                                  addPhoto(span.spanNumber, subComp.name, girderIndex, file)
-                                )
-                              }
-                            />
-                            {girder.photos && girder.photos.map((photo, photoIndex) => (
-                              <div key={photoIndex} style={{ marginTop: '10px' }}>
-                                <img src={photo.image} alt={`Photo ${photoIndex}`} style={{ maxWidth: '100px', marginRight: '10px' }} />
-                                <input
-                                  type="text"
-                                  placeholder="Caption"
-                                  value={photo.caption}
-                                  onChange={(e) =>
-                                    updateCaption(span.spanNumber, subComp.name, girderIndex, photoIndex, e.target.value)
-                                  }
-                                />
-                                <button onClick={() => removePhoto(span.spanNumber, subComp.name, girderIndex, photoIndex)}>Remove Photo</button>
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-                      </>
-                    )}
-                    {subComp.name !== 'Girders' && (
-                      <>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            Array.from(e.target.files).forEach((file) =>
-                              addPhoto(span.spanNumber, subComp.name, undefined, file)
-                            )
-                          }
-                        />
-                        {subComp.photos && subComp.photos.map((photo, photoIndex) => (
-                          <div key={photoIndex} style={{ marginTop: '10px' }}>
-                            <img src={photo.image} alt={`Photo ${photoIndex}`} style={{ maxWidth: '100px', marginRight: '10px' }} />
-                            <input
-                              type="text"
-                              placeholder="Caption"
-                              value={photo.caption}
-                              onChange={(e) =>
-                                updateCaption(span.spanNumber, subComp.name, undefined, photoIndex, e.target.value)
-                              }
-                            />
-                            <button onClick={() => removePhoto(span.spanNumber, subComp.name, undefined, photoIndex)}>Remove Photo</button>
-                          </div>
-                        ))}
-                      </>
-                    )}
+<h4>{subComp.name}</h4>
+<textarea
+  value={subComp.notes}
+  placeholder={`Enter notes for ${subComp.name}`}
+  onChange={(e) => updateNotes(span.spanNumber, subComp.name, e.target.value)}
+  style={{ width: '100%', marginBottom: '10px' }}
+/>
+
+{/* Logic for Girders */}
+{subComp.name === 'Girders' && (
+  <>
+    <button onClick={() => addGirder(span.spanNumber, 'Girders')}>
+      Add Girder
+    </button>
+    {subComp.girders && subComp.girders.map((girder, girderIndex) => (
+      <div key={girderIndex}>
+        <h5>{girder.name}</h5>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            Array.from(e.target.files).forEach((file) =>
+              addPhoto(span.spanNumber, 'Girders', girderIndex, file)
+            )
+          }
+        />
+        {girder.photos && girder.photos.map((photo, photoIndex) => (
+          <div key={photoIndex} style={{ marginTop: '10px' }}>
+            <img
+              src={photo.image}
+              alt={`Photo ${photoIndex}`}
+              style={{ maxWidth: '100px', marginRight: '10px' }}
+            />
+            <input
+              type="text"
+              placeholder="Caption"
+              value={photo.caption}
+              onChange={(e) =>
+                updateCaption(span.spanNumber, 'Girders', girderIndex, photoIndex, e.target.value)
+              }
+            />
+            <button onClick={() => removePhoto(span.spanNumber, 'Girders', girderIndex, photoIndex)}>
+              Remove Photo
+            </button>
+          </div>
+        ))}
+      </div>
+    ))}
+  </>
+)}
+
+{/* Logic for Cross Girders */}
+{subComp.name === 'Cross Girders' && (
+  <>
+    <button onClick={() => addGirder(span.spanNumber, 'Cross Girders')}>
+      Add Cross Girder
+    </button>
+    {subComp.girders && subComp.girders.map((crossGirder, crossGirderIndex) => (
+      <div key={crossGirderIndex}>
+        <h5>{crossGirder.name}</h5>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            Array.from(e.target.files).forEach((file) =>
+              addPhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, file)
+            )
+          }
+        />
+        {crossGirder.photos && crossGirder.photos.map((photo, photoIndex) => (
+          <div key={photoIndex} style={{ marginTop: '10px' }}>
+            <img
+              src={photo.image}
+              alt={`Photo ${photoIndex}`}
+              style={{ maxWidth: '100px', marginRight: '10px' }}
+            />
+            <input
+              type="text"
+              placeholder="Caption"
+              value={photo.caption}
+              onChange={(e) =>
+                updateCaption(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex, e.target.value)
+              }
+            />
+            <button onClick={() => removePhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex)}>
+              Remove Photo
+            </button>
+          </div>
+        ))}
+      </div>
+    ))}
+  </>
+)}
+
+{/* Logic for other subcomponents */}
+{!(subComp.name === 'Girders' || subComp.name === 'Cross Girders') && (
+  <>
+    <input
+      type="file"
+      accept="image/*"
+      onChange={(e) =>
+        Array.from(e.target.files).forEach((file) =>
+          addPhoto(span.spanNumber, subComp.name, undefined, file)
+        )
+      }
+    />
+    {subComp.photos && subComp.photos.map((photo, photoIndex) => (
+      <div key={photoIndex} style={{ marginTop: '10px' }}>
+        <img
+          src={photo.image}
+          alt={`Photo ${photoIndex}`}
+          style={{ maxWidth: '100px', marginRight: '10px' }}
+        />
+        <input
+          type="text"
+          placeholder="Caption"
+          value={photo.caption}
+          onChange={(e) =>
+            updateCaption(span.spanNumber, subComp.name, undefined, photoIndex, e.target.value)
+          }
+        />
+        <button onClick={() => removePhoto(span.spanNumber, subComp.name, undefined, photoIndex)}>
+          Remove Photo
+        </button>
+      </div>
+    ))}
+  </>
+)}
+
                     {subComp.isUserAdded && (
                       <button onClick={() => removeSubComponent(span.spanNumber, subComp.name)}>
                         Remove Subcomponent
