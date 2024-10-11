@@ -1,393 +1,382 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const VisualInspection = () => {
-  const [numSpans, setNumSpans] = useState('');
   const [spans, setSpans] = useState([]);
+  const [newSubComponentName, setNewSubComponentName] = useState('');
+  const getSpanName = (spanNumber, totalSpans) => {
+    if (totalSpans === 1) {
+      return 'Span A1-A2';
+    } else if (spanNumber === 1) {
+      return 'Span A1-P1';
+    } else if (spanNumber === totalSpans) {
+      return `Span P${spanNumber - 1}-A2`;
+    } else {
+      return `Span P${spanNumber - 1}-P${spanNumber}`;
+    }
+  };
+  
+  const toggleSpan = (spanNumber) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? { ...span, isExpanded: !span.isExpanded }
+          : span
+      )
+    );
+  };
+
+  // Initialize spans with subcomponents
+  const initializeSpans = (numberOfSpans) => {
+    const newSpans = [];
+    for (let i = 1; i <= numberOfSpans; i++) {
+      newSpans.push({
+        spanNumber: i,
+        subComponents: [
+          ...(i === 1 ? [{ name: 'Abutment 1', notes: '', photos: [] }] : []),
+          ...(i === 1 ? [{ name: 'Abutment Cap 1', notes: '', photos: [] }] : []),
+          ...(i === numberOfSpans ? [] : [{ name: `Pier ${i}`, notes: '', photos: [] }]),
+          ...(i === numberOfSpans ? [] : [{ name: `Pier Cap`, notes: '', photos: [] }]),
+          { name: 'Pedestal', notes: '', photos: [] },
+          { name: 'Bearing', notes: '', photos: [] },
+          { name: 'Girders', girders: [], notes: '' },
+          { name: 'Cross Girders', girders: [], notes: '' },
+          { name: `Deck Slab`, notes: '', photos: [] },
+          { name: 'Railing', notes: '', photos: [] }, // Railing
+          ...(i === numberOfSpans ? [{ name: 'Abutment 2', notes: '', photos: [] }] : []),
+          ...(i === numberOfSpans ? [{ name: 'Abutment Cap 2', notes: '', photos: [] }] : []),
+        ],
+      });
+    }
+    setSpans(newSpans);
+  };
+
   const navigate = useNavigate();
-
-
-  const handleSpanChange = (e) => {
-    const spansCount = Math.min(e.target.value, 500);
-    setNumSpans(spansCount);
-    setSpans(
-      Array.from({ length: spansCount }, () => ({
-        girders: [{ id: 1, name: 'Girder 1', notes: '' }], // Start with 1 girder as default
-        photos: [],
-        notes: '',
-        subComponents: [],
-        abutment1Photos: [],
-        abutment2Photos: [],
-        pierPhotos: [],
-        deckSlabPhotos: [],
-        girderPhotos: [],
-        bearingPhotos: [],
-        abutmentCapPhotos: [],
-        pierCapPhotos: [],
-        bearingPedestalPhotos: [],
-        expansionJointPhotos: [],
-        railingPhotos: [],
-      }))
-    );
-  };
-
-  // PhotoUpload Component
-  const PhotoUpload = ({ photos, setPhotos, label }) => {
-    const [photoCaptions, setPhotoCaptions] = useState(
-      photos.map((photo) => ({ id: photo.id, caption: photo.caption || '' }))
-    );
-  
-    const handlePhotoChange = (e) => {
-      const files = Array.from(e.target.files);
-      const newPhotos = files.map((file) => ({
-        id: Date.now() + Math.random(),
-        file: URL.createObjectURL(file),
-        caption: '',
-      }));
-      setPhotos([...photos, ...newPhotos]);
-      setPhotoCaptions([...photoCaptions, ...newPhotos.map(() => ({ caption: '' }))]);
-    };
-  
-    const handleCaptionChange = (id) => (event) => {
-      const updatedCaptions = photoCaptions.map((caption) =>
-        caption.id === id ? { ...caption, caption: event.target.value } : caption
-      );
-      setPhotoCaptions(updatedCaptions);
-    };
-  
-    const removePhoto = (id) => {
-      const updatedPhotos = photos.filter((photo) => photo.id !== id);
-      const updatedCaptions = photoCaptions.filter((caption) => caption.id !== id);
-      setPhotos(updatedPhotos);
-      setPhotoCaptions(updatedCaptions);
-    };
-  
-    return (
-      <div>
-        <h3>{label} Photos</h3>
-        <input type="file" multiple accept=".jpeg, .jpg" onChange={handlePhotoChange} />
-        {photos && photos.map((photo) => (
-          <div key={photo.id}>
-            <img src={photo.file} alt="uploaded" style={{ width: '100px', height: '100px' }} />
-            <input
-              type="text"
-              placeholder="Enter caption"
-              value={photoCaptions.find((caption) => caption.id === photo.id).caption}
-              onChange={handleCaptionChange(photo.id)}
-            />
-            <button type="button" onClick={() => removePhoto(photo.id)}>Remove</button>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const toggleSubComponents = (index) => {
-    const updatedSpans = [...spans];
-    updatedSpans[index].isOpen = !updatedSpans[index].isOpen;
-    setSpans(updatedSpans);
-  };
-
-  const addSubComponent = (spanIndex) => {
-    const updatedSpans = [...spans];
-    const newSubComponentId = updatedSpans[spanIndex].subComponents.length + 1;
-    updatedSpans[spanIndex].subComponents.push({
-      id: newSubComponentId,
-      name: '', // Initialize with an empty name for direct input
-      notes: '',
-      photos: [],
-    });
-    setSpans(updatedSpans);
-  };
-  
-
-  const removeSubComponent = (spanIndex, subComponentIndex) => {
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex].subComponents.splice(subComponentIndex, 1);
-    setSpans(updatedSpans);
-  };
-
-  const handleSubComponentChange = (e, spanIndex, subComponentIndex, field) => {
-    const { value } = e.target;
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex].subComponents[subComponentIndex][field] = value;
-    setSpans(updatedSpans);
-  };
-
-  const addGirder = (spanIndex) => {
-    const updatedSpans = [...spans];
-    const newGirderId = updatedSpans[spanIndex].girders.length + 1;
-    updatedSpans[spanIndex].girders.push({ id: newGirderId, name: `Girder ${newGirderId}`, notes: '' });
-    setSpans(updatedSpans);
-  };
-
-  const removeGirder = (spanIndex, girderIndex) => {
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex].girders.splice(girderIndex, 1); // Remove selected girder
-    setSpans(updatedSpans);
-  };
-
-  const handleNoteChange = (e, spanIndex, subComponent) => {
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex][subComponent] = e.target.value;
-    setSpans(updatedSpans);
-  };
-
-  const handleGirderNameChange = (e, spanIndex, girderIndex) => {
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex].girders[girderIndex].name = e.target.value; // Update girder name
-    setSpans(updatedSpans);
-  };
-
-  const handleGirderNoteChange = (e, spanIndex, girderIndex) => {
-    const updatedSpans = [...spans];
-    updatedSpans[spanIndex].girders[girderIndex].notes = e.target.value;
-    setSpans(updatedSpans);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleNextClick = () => {
     navigate('/bridgeratingform');
   };
 
+  // Function to add a new girder
+  const addGirder = (spanNumber) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) =>
+                subComp.name === 'Girders'
+                  ? {
+                      ...subComp,
+                      girders: [
+                        ...subComp.girders,
+                        { name: `Girder ${subComp.girders.length + 1}`, photos: [] },
+                      ],
+                    }
+                  : subComp
+              ),
+            }
+          : span
+      )
+    );
+  };
+
+  // Function to add a new subcomponent
+  const addSubComponent = (spanNumber) => {
+    if (!newSubComponentName) return; // Prevent empty names
+    setSpans((prevSpans) =>
+        prevSpans.map((span) =>
+            span.spanNumber === spanNumber
+                ? {
+                    ...span,
+                    subComponents: [
+                        ...span.subComponents,
+                        { name: newSubComponentName, notes: '', photos: [], isUserAdded: true }, // Mark as user added
+                    ],
+                }
+                : span
+        )
+    );
+    setNewSubComponentName(''); // Clear input field after adding
+};
+
+  // Function to add a photo
+  const addPhoto = (spanNumber, subComponentName, girderIndex, photo) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) => {
+                if (subComp.name === subComponentName) {
+                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
+                    // Handle adding photo to specific girder
+                    return {
+                      ...subComp,
+                      girders: subComp.girders.map((girder, index) =>
+                        index === girderIndex
+                          ? {
+                              ...girder,
+                              photos: [
+                                ...girder.photos,
+                                { image: URL.createObjectURL(photo), caption: '' },
+                              ],
+                            }
+                          : girder
+                      ),
+                    };
+                  } else {
+                    // Handle adding photo to subcomponent
+                    return {
+                      ...subComp,
+                      photos: [
+                        ...subComp.photos,
+                        { image: URL.createObjectURL(photo), caption: '' },
+                      ],
+                    };
+                  }
+                }
+                return subComp;
+              }),
+            }
+          : span
+      )
+    );
+  };
+
+  // Function to remove a photo
+  const removePhoto = (spanNumber, subComponentName, girderIndex, photoIndex) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) => {
+                if (subComp.name === subComponentName) {
+                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
+                    // Handle removing photo from specific girder
+                    return {
+                      ...subComp,
+                      girders: subComp.girders.map((girder, index) =>
+                        index === girderIndex
+                          ? {
+                              ...girder,
+                              photos: girder.photos.filter((_, index) => index !== photoIndex),
+                            }
+                          : girder
+                      ),
+                    };
+                  } else {
+                    // Handle removing photo from subcomponent
+                    return {
+                      ...subComp,
+                      photos: subComp.photos.filter((_, index) => index !== photoIndex),
+                    };
+                  }
+                }
+                return subComp;
+              }),
+            }
+          : span
+      )
+    );
+  };
+
+  // Function to remove a subcomponent
+  const removeSubComponent = (spanNumber, subComponentName) => {
+    setSpans((prevSpans) =>
+        prevSpans.map((span) =>
+            span.spanNumber === spanNumber
+                ? {
+                    ...span,
+                    subComponents: span.subComponents.filter((subComp) => subComp.name !== subComponentName),
+                }
+                : span
+        )
+    );
+};
+  // Function to update caption for a photo
+  const updateCaption = (spanNumber, subComponentName, girderIndex, photoIndex, caption) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) => {
+                if (subComp.name === subComponentName) {
+                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
+                    // Update caption for specific girder
+                    return {
+                      ...subComp,
+                      girders: subComp.girders.map((girder, index) =>
+                        index === girderIndex
+                          ? {
+                              ...girder,
+                              photos: girder.photos.map((photo, index) =>
+                                index === photoIndex ? { ...photo, caption } : photo
+                              ),
+                            }
+                          : girder
+                      ),
+                    };
+                  } else {
+                    // Update caption for subcomponent
+                    return {
+                      ...subComp,
+                      photos: subComp.photos.map((photo, index) =>
+                        index === photoIndex ? { ...photo, caption } : photo
+                      ),
+                    };
+                  }
+                }
+                return subComp;
+              }),
+            }
+          : span
+      )
+    );
+  };
+
+  // Function to update notes for a subcomponent
+  const updateNotes = (spanNumber, subComponentName, notes) => {
+    setSpans((prevSpans) =>
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) =>
+                subComp.name === subComponentName ? { ...subComp, notes } : subComp
+              ),
+            }
+          : span
+      )
+    );
+  };
+
+  
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <h1>Visual Inspection</h1>
       <label>
-        Enter Number of Spans (up to 500):
+        Enter Number of Spans:
         <input
           type="number"
-          value={numSpans || ''}
-          onChange={handleSpanChange}
-          min={1}
-          max={500}
-          placeholder="Enter number of spans"
+          onChange={(e) => {
+            const numSpans = parseInt(e.target.value) || 0;
+            if (numSpans <= 100) {
+              initializeSpans(numSpans);
+            } else {
+              alert("Maximum number of spans is 100.");
+            }
+          }}
+          max="100"
         />
       </label>
-
-      {spans.map((span, index) => (
-        <div key={index}>
-          <div 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              marginBottom: '20px' // Adjust this value to increase or decrease spacing between spans
-            }}
-          >
-            <h2 style={{ margin: '0' }}>
-              Span {index + 1}
-            </h2>
-            <button 
-              type="button" 
-              onClick={() => toggleSubComponents(index)}
-              style={{
-                alignSelf: 'center', 
-                marginLeft: '10px',   
-                fontSize: '0.7em',    
-              }}
-            >
-              {span.isOpen ? '-' : '+'}
-            </button>
-          </div>
-                    
-          {span.isOpen && (
-            <div style={{ marginLeft: '20px' }}>
-              {numSpans > 1 && (
-                <div>
-                  <h3>Pier {index + 1}</h3>
-                  <textarea
-                    placeholder={`Enter notes for Pier ${index + 1}`}
-                    value={span.pierNotes || ''}
-                    onChange={(e) => handleNoteChange(e, index, 'pierNotes')}
-                    style={{ width: '300px', height: '100px' }}
-                  />
-                  <PhotoUpload
-                    photos={span.pierPhotos}
-                    setPhotos={(photos) => {
-                      const updatedSpans = [...spans];
-                      updatedSpans[index].pierPhotos = photos;
-                      setSpans(updatedSpans);
-                    }}
-                    label="Pier"
-                  />
-                </div>
-              )}
-
-              {index === 0 && (
-                <div>
-                  <h3>Abutment 1</h3>
-                  <textarea
-                    placeholder="Enter notes for Abutment 1"
-                    value={span.abutment1Notes || ''}
-                    onChange={(e) => handleNoteChange(e, index, 'abutment1Notes')}
-                    style={{ width: '300px', height: '100px' }}
-                  />
-                  <PhotoUpload photos={span.abutment1Photos} setPhotos={(photos) => {
-                    const updatedSpans = [...spans];
-                    updatedSpans[index].abutment1Photos = photos;
-                    setSpans(updatedSpans);
-                  }} label="Abutment 1" />
-                </div>
-              )}
-
-              {index === spans.length - 1 && (
-                <div>
-                  <h3>Abutment 2</h3>
-                  <textarea
-                    placeholder="Enter notes for Abutment 2"
-                    value={span.abutment2Notes || ''}
-                    onChange={(e) => handleNoteChange(e, index, 'abutment2Notes')}
-                    style={{ width: '300px', height: '100px' }}
-                  />
-                  <PhotoUpload photos={span.abutment2Photos} setPhotos={(photos) => {
-                    const updatedSpans = [...spans];
-                    updatedSpans[index].abutment2Photos = photos;
-                    setSpans(updatedSpans);
-                  }} label="Abutment 2" />
-                </div>
-              )}
-
-                <div>
-                  <h3>Girders</h3>
-
-                  {span.girders && span.girders.map((girder, girderIndex) => (
-                    <div key={girder.id} style={{ marginLeft: '20px' }}>
-                      <input
-                        type="text"
-                        value={girder.name}
-                        onChange={(e) => handleGirderNameChange(e, index, girderIndex)} // Change girder name here
-                        placeholder="Girder Name"
-                        style={{ width: '150px', marginRight: '10px' }}
-                      />
-                      <h4>{girder.name}</h4>
-                      <textarea
-                        placeholder={`Enter notes for ${girder.name}`}
-                        value={girder.notes || ''}
-                        onChange={(e) => handleGirderNoteChange(e, index, girderIndex)}
-                        style={{ width: '300px', height: '100px' }}
-                      />
-                      <button type="button" onClick={() => removeGirder(index, girderIndex)}>Remove Girder</button>
-                    </div>
-                  ))}
-                  <button type="button" onClick={() => addGirder(index)}>Add Girder</button>
-                </div>
-                    {/* Photo upload for all girders */}
-                    <PhotoUpload photos={span.girderPhotos} setPhotos={(photos) => {
-                    const updatedSpans = [...spans];
-                    updatedSpans[index].girderPhotos = photos;
-                    setSpans(updatedSpans);
-                  }} label="Girder" />
-
+      <div>
+        {spans.map((span) => (
+          <div key={span.spanNumber} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
+            <h3>
+            {getSpanName(span.spanNumber, spans.length)}
+              <button onClick={() => toggleSpan(span.spanNumber)} style={{ marginLeft: '10px' }}>
+                {span.isExpanded ? '-' : '+'}
+              </button>
+            </h3>
+            {span.isExpanded && (
               <div>
-                <h3>Deck Slab</h3>
-                <textarea
-                  placeholder="Enter notes for Deck Slab"
-                  value={span.deckSlabNotes || ''}
-                  onChange={(e) => handleNoteChange(e, index, 'deckSlabNotes')}
-                  style={{ width: '300px', height: '100px' }}
-                />
-                <PhotoUpload photos={span.deckSlabPhotos} setPhotos={(photos) => {
-                  const updatedSpans = [...spans];
-                  updatedSpans[index].deckSlabPhotos = photos;
-                  setSpans(updatedSpans);
-                }} label="Deck Slab" />
-              </div>
-
-              <div>
-                <h3>Pier Cap</h3>
-                <textarea
-                  placeholder="Enter notes for Pier Cap"
-                  value={span.pierCapNotes || ''}
-                  onChange={(e) => handleNoteChange(e, index, 'pierCapNotes')}
-                  style={{ width: '300px', height: '100px' }}
-                />
-                <PhotoUpload photos={span.pierCapPhotos} setPhotos={(photos) => {
-                  const updatedSpans = [...spans];
-                  updatedSpans[index].pierCapPhotos = photos;
-                  setSpans(updatedSpans);
-                }} label="Pier Cap" />
-              </div>
-
-              <div>
-                <h3>Bearing Pedestal</h3>
-                <textarea
-                  placeholder="Enter notes for Bearing Pedestal"
-                  value={span.bearingPedestalNotes || ''}
-                  onChange={(e) => handleNoteChange(e, index, 'bearingPedestalNotes')}
-                  style={{ width: '300px', height: '100px' }}
-                />
-                <PhotoUpload photos={span.bearingPedestalPhotos} setPhotos={(photos) => {
-                  const updatedSpans = [...spans];
-                  updatedSpans[index].bearingPedestalPhotos = photos;
-                  setSpans(updatedSpans);
-                }} label="Bearing Pedestal" />
-              </div>
-
-              <div>
-                <h3>Expansion Joint</h3>
-                <textarea
-                  placeholder="Enter notes for Expansion Joint"
-                  value={span.expansionJointNotes || ''}
-                  onChange={(e) => handleNoteChange(e, index, 'expansionJointNotes')}
-                  style={{ width: '300px', height: '100px' }}
-                />
-                <PhotoUpload photos={span.expansionJointPhotos} setPhotos={(photos) => {
-                  const updatedSpans = [...spans];
-                  updatedSpans[index].expansionJointPhotos = photos;
-                  setSpans(updatedSpans);
-                }} label="Expansion Joint" />
-              </div>
-
-              <div>
-                <h3>Railing</h3>
-                <textarea
-                  placeholder="Enter notes for Railing"
-                  value={span.railingNotes || ''}
-                  onChange={(e) => handleNoteChange(e, index, 'railingNotes')}
-                  style={{ width: '300px', height: '100px' }}
-                />
-                <PhotoUpload photos={span.railingPhotos} setPhotos={(photos) => {
-                  const updatedSpans = [...spans];
-                  updatedSpans[index].railingPhotos = photos;
-                  setSpans(updatedSpans);
-                }} label="Railing" />
-              </div>
-
-              <div>
-                <h3>Custom Component</h3>
-                {span.subComponents.map((sub, subComponentIndex) => (
-                  <div key={sub.id}>
-                    <input
-                      type="text"
-                      placeholder="Subcomponent Name"
-                      value={sub.name || ''}
-                      onChange={(e) => handleSubComponentChange(e, index, subComponentIndex, 'name')}
-                      style={{ width: '150px' }}
-                    />
+                {span.subComponents.map((subComp, subCompIndex) => (
+                  <div key={subCompIndex}>
+                    <h4>{subComp.name}</h4>
                     <textarea
-                      placeholder={`Enter notes for ${sub.name}`}
-                      value={sub.notes || ''}
-                      onChange={(e) => handleSubComponentChange(e, index, subComponentIndex, 'notes')}
-                      style={{ width: '300px', height: '100px' }}
+                      value={subComp.notes}
+                      placeholder={`Enter notes for ${subComp.name}`}
+                      onChange={(e) => updateNotes(span.spanNumber, subComp.name, e.target.value)}
+                      style={{ width: '100%', marginBottom: '10px' }}
                     />
-                    <PhotoUpload photos={sub.photos} setPhotos={(photos) => {
-                      const updatedSpans = [...spans];
-                      updatedSpans[index].subComponents[subComponentIndex].photos = photos;
-                      setSpans(updatedSpans);
-                    }} label={sub.name || 'Subcomponent'} />
-                    <button type="button" onClick={() => removeSubComponent(index, subComponentIndex)}>Remove Subcomponent</button>
+                    {subComp.name === 'Girders' && (
+                      <>
+                        <button onClick={() => addGirder(span.spanNumber)}>Add Girder</button>
+                        {subComp.girders && subComp.girders.map((girder, girderIndex) => (
+                          <div key={girderIndex}>
+                            <h5>{girder.name}</h5>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) =>
+                                Array.from(e.target.files).forEach((file) =>
+                                  addPhoto(span.spanNumber, subComp.name, girderIndex, file)
+                                )
+                              }
+                            />
+                            {girder.photos && girder.photos.map((photo, photoIndex) => (
+                              <div key={photoIndex} style={{ marginTop: '10px' }}>
+                                <img src={photo.image} alt={`Photo ${photoIndex}`} style={{ maxWidth: '100px', marginRight: '10px' }} />
+                                <input
+                                  type="text"
+                                  placeholder="Caption"
+                                  value={photo.caption}
+                                  onChange={(e) =>
+                                    updateCaption(span.spanNumber, subComp.name, girderIndex, photoIndex, e.target.value)
+                                  }
+                                />
+                                <button onClick={() => removePhoto(span.spanNumber, subComp.name, girderIndex, photoIndex)}>Remove Photo</button>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {subComp.name !== 'Girders' && (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            Array.from(e.target.files).forEach((file) =>
+                              addPhoto(span.spanNumber, subComp.name, undefined, file)
+                            )
+                          }
+                        />
+                        {subComp.photos && subComp.photos.map((photo, photoIndex) => (
+                          <div key={photoIndex} style={{ marginTop: '10px' }}>
+                            <img src={photo.image} alt={`Photo ${photoIndex}`} style={{ maxWidth: '100px', marginRight: '10px' }} />
+                            <input
+                              type="text"
+                              placeholder="Caption"
+                              value={photo.caption}
+                              onChange={(e) =>
+                                updateCaption(span.spanNumber, subComp.name, undefined, photoIndex, e.target.value)
+                              }
+                            />
+                            <button onClick={() => removePhoto(span.spanNumber, subComp.name, undefined, photoIndex)}>Remove Photo</button>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {subComp.isUserAdded && (
+                      <button onClick={() => removeSubComponent(span.spanNumber, subComp.name)}>
+                        Remove Subcomponent
+                      </button>
+                    )}
                   </div>
                 ))}
-                <button type="button" onClick={() => addSubComponent(index)}>Add Subcomponent</button>
+                <input
+                  type="text"
+                  value={newSubComponentName}
+                  onChange={(e) => setNewSubComponentName(e.target.value)}
+                  placeholder="Add new component"
+                />
+                <button onClick={() => addSubComponent(span.spanNumber)}>+ Component</button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        ))}
+        <div>
+        <button onClick={handleNextClick}>Next</button>
         </div>
-      ))}
 
-      <button type="submit">Next</button>
-    </form>
+      </div>
+    </div>
   );
+  
 };
 
 export default VisualInspection;
