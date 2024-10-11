@@ -295,134 +295,137 @@ const VisualInspection = () => {
               <div>
                 {span.subComponents.map((subComp, subCompIndex) => (
                   <div key={subCompIndex}>
-<h4>{subComp.name}</h4>
-<textarea
-  value={subComp.notes}
-  placeholder={`Enter notes for ${subComp.name}`}
-  onChange={(e) => updateNotes(span.spanNumber, subComp.name, e.target.value)}
-  style={{ width: '100%', marginBottom: '10px' }}
-/>
+                  <h4>{subComp.name}</h4>
+                  <textarea
+                    value={subComp.notes}
+                    placeholder={`Enter notes for ${subComp.name}`}
+                    onChange={(e) => updateNotes(span.spanNumber, subComp.name, e.target.value)}
+                    style={{ width: '100%', marginBottom: '10px' }}
+                  />
 
-{/* Logic for Girders */}
-{subComp.name === 'Girders' && (
-  <>
-    <button onClick={() => addGirder(span.spanNumber, 'Girders')}>
-      Add Girder
-    </button>
-    {subComp.girders && subComp.girders.map((girder, girderIndex) => (
-      <div key={girderIndex}>
-        <h5>{girder.name}</h5>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) =>
-            Array.from(e.target.files).forEach((file) =>
-              addPhoto(span.spanNumber, 'Girders', girderIndex, file)
-            )
-          }
-        />
-        {girder.photos && girder.photos.map((photo, photoIndex) => (
-          <div key={photoIndex} style={{ marginTop: '10px' }}>
-            <img
-              src={photo.image}
-              alt={`Photo ${photoIndex}`}
-              style={{ maxWidth: '100px', marginRight: '10px' }}
-            />
-            <input
-              type="text"
-              placeholder="Caption"
-              value={photo.caption}
-              onChange={(e) =>
-                updateCaption(span.spanNumber, 'Girders', girderIndex, photoIndex, e.target.value)
-              }
-            />
-            <button onClick={() => removePhoto(span.spanNumber, 'Girders', girderIndex, photoIndex)}>
-              Remove Photo
-            </button>
-          </div>
-        ))}
-      </div>
-    ))}
-  </>
-)}
+                  {/* Logic for Girders */}
+                  {subComp.name === 'Girders' && (
+                    <>
+                      <button onClick={() => addGirder(span.spanNumber, 'Girders')}>
+                        Add Girder
+                      </button>
+                      {subComp.girders && subComp.girders.map((girder, girderIndex) => (
+                        <div key={girderIndex}>
+                          <h5>{girder.name}</h5>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              Array.from(e.target.files).forEach((file) =>
+                                addPhoto(span.spanNumber, 'Girders', girderIndex, file)
+                              )
+                            }
+                          />
+                          {girder.photos && girder.photos.map((photo, photoIndex) => (
+                          <div key={photoIndex} style={{ marginTop: '10px', display: 'flex', alignItems: 'flex-start' }}>
+                            <span style={{ marginRight: '10px' }}>{photoIndex + 1}.</span>  { /* Add numbering */}
+                            <img
+                              src={photo.image}
+                              alt={`Photo ${photoIndex}`}
+                              style={{ maxWidth: '100px', marginRight: '10px' }}
+                            />
+                            <input
+                              type="text"
+                              placeholder="Caption"
+                              value={photo.caption}
+                              onChange={(e) =>
+                                updateCaption(span.spanNumber, 'Girders', girderIndex, photoIndex, e.target.value)
+                              }
+                            />
+                            <button onClick={() => removePhoto(span.spanNumber, 'Girders', girderIndex, photoIndex)}>
+                              Remove Photo
+                            </button>
+                          </div>
+                        ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
 
-{/* Logic for Cross Girders */}
-{subComp.name === 'Cross Girders' && (
-  <>
-    <button onClick={() => addGirder(span.spanNumber, 'Cross Girders')}>
-      Add Cross Girder
-    </button>
-    {subComp.girders && subComp.girders.map((crossGirder, crossGirderIndex) => (
-      <div key={crossGirderIndex}>
-        <h5>{crossGirder.name}</h5>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) =>
-            Array.from(e.target.files).forEach((file) =>
-              addPhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, file)
-            )
-          }
-        />
-        {crossGirder.photos && crossGirder.photos.map((photo, photoIndex) => (
-          <div key={photoIndex} style={{ marginTop: '10px' }}>
-            <img
-              src={photo.image}
-              alt={`Photo ${photoIndex}`}
-              style={{ maxWidth: '100px', marginRight: '10px' }}
-            />
-            <input
-              type="text"
-              placeholder="Caption"
-              value={photo.caption}
-              onChange={(e) =>
-                updateCaption(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex, e.target.value)
-              }
-            />
-            <button onClick={() => removePhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex)}>
-              Remove Photo
-            </button>
-          </div>
-        ))}
-      </div>
-    ))}
-  </>
-)}
+                  {/* Logic for Cross Girders */}
+                  {subComp.name === 'Cross Girders' && (
+                    <>
+                      <button onClick={() => addGirder(span.spanNumber, 'Cross Girders')}>
+                        Add Cross Girder
+                      </button>
+                      {subComp.girders && subComp.girders.map((crossGirder, crossGirderIndex) => (
+                        <div key={crossGirderIndex}>
+                          <h5>{crossGirder.name}</h5>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              Array.from(e.target.files).forEach((file) =>
+                                addPhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, file)
+                              )
+                            }
+                          />
+                          {crossGirder.photos && crossGirder.photos.map((photo, photoIndex) => (
+                            <div key={photoIndex} style={{ marginTop: '10px', display: 'flex', alignItems: 'flex-start'}}>
+                              <span style={{ marginRight: '10px' }}>{photoIndex + 1}.</span>
+                              <img
+                                src={photo.image}
+                                alt={`Photo ${photoIndex}`}
+                                style={{ maxWidth: '100px', marginRight: '10px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Caption"
+                                value={photo.caption}
+                                onChange={(e) =>
+                                  updateCaption(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex, e.target.value)
+                                }
+                              />
+                              <button onClick={() => removePhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex)}>
+                                Remove Photo
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
 
-{/* Logic for other subcomponents */}
-{!(subComp.name === 'Girders' || subComp.name === 'Cross Girders') && (
-  <>
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) =>
-        Array.from(e.target.files).forEach((file) =>
-          addPhoto(span.spanNumber, subComp.name, undefined, file)
-        )
-      }
-    />
-    {subComp.photos && subComp.photos.map((photo, photoIndex) => (
-      <div key={photoIndex} style={{ marginTop: '10px' }}>
-        <img
-          src={photo.image}
-          alt={`Photo ${photoIndex}`}
-          style={{ maxWidth: '100px', marginRight: '10px' }}
-        />
-        <input
-          type="text"
-          placeholder="Caption"
-          value={photo.caption}
-          onChange={(e) =>
-            updateCaption(span.spanNumber, subComp.name, undefined, photoIndex, e.target.value)
-          }
-        />
-        <button onClick={() => removePhoto(span.spanNumber, subComp.name, undefined, photoIndex)}>
-          Remove Photo
-        </button>
-      </div>
-    ))}
-  </>
-)}
+                  {/* Logic for other subcomponents */}
+                  {!(subComp.name === 'Girders' || subComp.name === 'Cross Girders') && (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          Array.from(e.target.files).forEach((file) =>
+                            addPhoto(span.spanNumber, subComp.name, undefined, file)
+                          )
+                        }
+                      />
+                      {subComp.photos && subComp.photos.map((photo, photoIndex) => (
+                        <div key={photoIndex} style={{ marginTop: '10px', display: 'flex', alignItems: 'flex-start' }}>
+                          <span style={{ marginRight: '10px' }}>{photoIndex + 1}.</span>
+                          <img
+                            src={photo.image}
+                            alt={`Photo ${photoIndex}`}
+                            style={{ maxWidth: '100px', marginRight: '10px' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Caption"
+                            value={photo.caption}
+                            onChange={(e) =>
+                              updateCaption(span.spanNumber, subComp.name, undefined, photoIndex, e.target.value)
+                            }
+                          />
+                          <button onClick={() => removePhoto(span.spanNumber, subComp.name, undefined, photoIndex)}>
+                            Remove Photo
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  )}
 
                     {subComp.isUserAdded && (
                       <button onClick={() => removeSubComponent(span.spanNumber, subComp.name)}>
