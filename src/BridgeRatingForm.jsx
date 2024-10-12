@@ -242,7 +242,7 @@ const BridgeRatingForm = () => {
 
     // Store the calculated BHI and form data into localStorage
     const ratingsData = { ...formData, BHI };
-    localStorage.setItem('bridgeratingReport', JSON.stringify(ratingsData));
+    localStorage.setItem('bridgeratingData', JSON.stringify(ratingsData));
 
     // Navigate to the report page
     navigate('/report');

@@ -28,7 +28,7 @@ const Report = () => {
   }, []);
 
   // Retrieve the bridge report data from localStorage
-  const ratingData = JSON.parse(localStorage.getItem('bridgeratingReport'));
+  const ratingData = JSON.parse(localStorage.getItem('bridgeratingData'));
   const projectInfo =  JSON.parse(localStorage.getItem('projectInfo')) || {};
   const storedData = localStorage.getItem('surveydata');
   const formData = storedData ? JSON.parse(storedData) : {};
@@ -41,6 +41,7 @@ const Report = () => {
     if (data) {
       setBridgeData(JSON.parse(data));
     }
+    
   }, []);
 
   const convertObjectToArray = (data) => {
@@ -187,11 +188,7 @@ const reportArray = convertObjectToArray(formData);
       {/* Display Condition State and Bridge Star Rating */}
       <h3>Condition state of Bridge: {condition}</h3>
       <h3>Bridge Star Rating: {starRating}</h3>
-
-      {/* Button to go back to the form */}
-      <button onClick={() => navigate('/bridgeratingform')} style={{ marginTop: '20px', padding: '10px 20px' }}>
-        Back to Form
-      </button>
+      
     </div>
   );
 };

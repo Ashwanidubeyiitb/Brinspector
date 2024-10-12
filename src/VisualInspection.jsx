@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const VisualInspection = () => {
   const [spans, setSpans] = useState([]);
   const [newSubComponentName, setNewSubComponentName] = useState('');
+  const navigate = useNavigate();
+
   const getSpanName = (spanNumber, totalSpans) => {
     if (totalSpans === 1) {
       return 'Span A1-A2';
@@ -40,7 +42,7 @@ const VisualInspection = () => {
           { name: 'Pedestal', notes: '', photos: [] },
           { name: 'Bearing', notes: '', photos: [] },
           { name: 'Girders', girders: [], notes: '' },
-          { name: 'Cross Girders', girders: [], notes: '' },
+          { name: 'Cross Girders', crossgirders: [], notes: '' },
           { name: `Deck Slab`, notes: '', photos: [] },
           { name: 'Railing', notes: '', photos: [] }, // Railing
           ...(i === numberOfSpans ? [{ name: 'Abutment 2', notes: '', photos: [] }] : []),
@@ -51,7 +53,6 @@ const VisualInspection = () => {
     setSpans(newSpans);
   };
 
-  const navigate = useNavigate();
   const handleNextClick = () => {
     navigate('/bridgeratingform');
   };
@@ -59,32 +60,42 @@ const VisualInspection = () => {
   // Function to add a new girder
   const addGirder = (spanNumber, componentName) => {
     setSpans((prevSpans) =>
-    prevSpans.map((span) =>
-      span.spanNumber === spanNumber
-        ? {
-            ...span,
-            subComponents: span.subComponents.map((subComp) =>
-              subComp.name === componentName
-                ? {
-                    ...subComp,
-                    girders: [
-                      ...subComp.girders,
-                      {
-                        name: componentName === 'Girders'
-                          ? `Girder ${subComp.girders.length + 1}`
-                          : componentName === 'Cross Girders'
-                          ? `Cross Girder ${subComp.girders.length + 1}`
-                          : '',
-                        photos: [],
-                      },
-                    ],
-                  }
-                : subComp
-            ),
-          }
-        : span
-    ));
-    };
+      prevSpans.map((span) =>
+        span.spanNumber === spanNumber
+          ? {
+              ...span,
+              subComponents: span.subComponents.map((subComp) =>
+                subComp.name === componentName
+                  ? {
+                      ...subComp,
+                      // Check if component is 'Girders' or 'Cross Girders' and update the correct array
+                      girders: componentName === 'Girders'
+                        ? [
+                            ...subComp.girders,
+                            {
+                              name: `Girder ${subComp.girders.length + 1}`,
+                              photos: [],
+                            },
+                          ]
+                        : subComp.girders, // Keep existing girders unchanged for Cross Girders
+                      crossgirders: componentName === 'Cross Girders'
+                        ? [
+                            ...subComp.crossgirders,
+                            {
+                              name: `Cross Girder ${subComp.crossgirders.length + 1}`,
+                              photos: [],
+                            },
+                          ]
+                        : subComp.crossgirders, // Keep existing crossgirders unchanged for Girders
+                    }
+                  : subComp
+              ),
+            }
+          : span
+      )
+    );
+  };
+  
   
   // Function to add a new subcomponent
   const addSubComponent = (spanNumber) => {
@@ -106,6 +117,7 @@ const VisualInspection = () => {
 };
 
   // Function to add a photo
+// Updated Function to add a photo for both girders and cross girders
   const addPhoto = (spanNumber, subComponentName, girderIndex, photo) => {
     setSpans((prevSpans) =>
       prevSpans.map((span) =>
@@ -114,26 +126,40 @@ const VisualInspection = () => {
               ...span,
               subComponents: span.subComponents.map((subComp) => {
                 if (subComp.name === subComponentName) {
-                  if (subComp.name === 'Girders' || subComp.name === 'Cross Girders') {
-                    // Handle adding photo to specific girder or cross girder
-                    if (girderIndex !== undefined) {
-                      return {
-                        ...subComp,
-                        girders: subComp.girders.map((girder, index) =>
-                          index === girderIndex
-                            ? {
-                                ...girder,
-                                photos: [
-                                  ...girder.photos,
-                                  { image: URL.createObjectURL(photo), caption: '' },
-                                ],
-                              }
-                            : girder
-                        ),
-                      };
-                    }
+                  if (subComponentName === 'Girders' && girderIndex !== undefined) {
+                    // Handle adding photo to a specific girder
+                    return {
+                      ...subComp,
+                      girders: subComp.girders.map((girder, index) =>
+                        index === girderIndex
+                          ? {
+                              ...girder,
+                              photos: [
+                                ...girder.photos,
+                                { image: URL.createObjectURL(photo), caption: '' },
+                              ],
+                            }
+                          : girder
+                      ),
+                    };
+                  } else if (subComponentName === 'Cross Girders' && girderIndex !== undefined) {
+                    // Handle adding photo to a specific cross girder
+                    return {
+                      ...subComp,
+                      crossgirders: subComp.crossgirders.map((crossgirder, index) =>
+                        index === girderIndex
+                          ? {
+                              ...crossgirder,
+                              photos: [
+                                ...crossgirder.photos,
+                                { image: URL.createObjectURL(photo), caption: '' },
+                              ],
+                            }
+                          : crossgirder
+                      ),
+                    };
                   } else {
-                    // Handle adding photo to subcomponent
+                    // Handle adding photo to other subcomponents that aren't Girders or Cross Girders
                     return {
                       ...subComp,
                       photos: [
@@ -149,10 +175,10 @@ const VisualInspection = () => {
           : span
       )
     );
-  };  
+  };
 
   // Function to remove a photo
-  const removePhoto = (spanNumber, subComponentName, girderIndex, photoIndex) => {
+const removePhoto = (spanNumber, subComponentName, girderIndex, photoIndex) => {
   setSpans((prevSpans) =>
     prevSpans.map((span) =>
       span.spanNumber === spanNumber
@@ -160,23 +186,34 @@ const VisualInspection = () => {
             ...span,
             subComponents: span.subComponents.map((subComp) => {
               if (subComp.name === subComponentName) {
-                if (subComp.name === 'Girders' || subComp.name === 'Cross Girders') {
-                  // Handle removing photo from specific girder or cross girder
-                  if (girderIndex !== undefined) {
-                    return {
-                      ...subComp,
-                      girders: subComp.girders.map((girder, index) =>
-                        index === girderIndex
-                          ? {
-                              ...girder,
-                              photos: girder.photos.filter((_, idx) => idx !== photoIndex),
-                            }
-                          : girder
-                      ),
-                    };
-                  }
+                if (subComponentName === 'Girders' && girderIndex !== undefined) {
+                  // Handle removing photo from a specific girder
+                  return {
+                    ...subComp,
+                    girders: subComp.girders.map((girder, index) =>
+                      index === girderIndex
+                        ? {
+                            ...girder,
+                            photos: girder.photos.filter((_, idx) => idx !== photoIndex),
+                          }
+                        : girder
+                    ),
+                  };
+                } else if (subComponentName === 'Cross Girders' && girderIndex !== undefined) {
+                  // Handle removing photo from a specific cross girder
+                  return {
+                    ...subComp,
+                    crossgirders: subComp.crossgirders.map((crossgirder, index) =>
+                      index === girderIndex
+                        ? {
+                            ...crossgirder,
+                            photos: crossgirder.photos.filter((_, idx) => idx !== photoIndex),
+                          }
+                        : crossgirder
+                    ),
+                  };
                 } else {
-                  // Handle removing photo from subcomponent
+                  // Handle removing photo from other subcomponents
                   return {
                     ...subComp,
                     photos: subComp.photos.filter((_, idx) => idx !== photoIndex),
@@ -187,9 +224,10 @@ const VisualInspection = () => {
             }),
           }
         : span
-      )
-    );
-  };
+    )
+  );
+};
+
 
   // Function to remove a subcomponent
   const removeSubComponent = (spanNumber, subComponentName) => {
@@ -206,46 +244,66 @@ const VisualInspection = () => {
   };
 
   // Function to update caption for a photo
-  const updateCaption = (spanNumber, subComponentName, girderIndex, photoIndex, caption) => {
-    setSpans((prevSpans) =>
+// Function to update caption for a photo
+const updateCaption = (spanNumber, subComponentName, girderIndex, photoIndex, caption) => {
+  setSpans((prevSpans) =>
       prevSpans.map((span) =>
-        span.spanNumber === spanNumber
-          ? {
-              ...span,
-              subComponents: span.subComponents.map((subComp) => {
-                if (subComp.name === subComponentName) {
-                  if (subComp.name === 'Girders' && girderIndex !== undefined) {
-                    // Update caption for specific girder
-                    return {
-                      ...subComp,
-                      girders: subComp.girders.map((girder, index) =>
-                        index === girderIndex
-                          ? {
-                              ...girder,
-                              photos: girder.photos.map((photo, index) =>
-                                index === photoIndex ? { ...photo, caption } : photo
-                              ),
-                            }
-                          : girder
-                      ),
-                    };
-                  } else {
-                    // Update caption for subcomponent
-                    return {
-                      ...subComp,
-                      photos: subComp.photos.map((photo, index) =>
-                        index === photoIndex ? { ...photo, caption } : photo
-                      ),
-                    };
-                  }
-                }
-                return subComp;
-              }),
-            }
-          : span
+          span.spanNumber === spanNumber
+              ? {
+                  ...span,
+                  subComponents: span.subComponents.map((subComp) => {
+                      if (subComp.name === subComponentName) {
+                          // Check if it's Girders
+                          if (subComp.name === 'Girders' && girderIndex !== undefined) {
+                              return {
+                                  ...subComp,
+                                  girders: subComp.girders.map((girder, index) =>
+                                      index === girderIndex
+                                          ? {
+                                              ...girder,
+                                              photos: girder.photos.map((photo, index) =>
+                                                  index === photoIndex ? { ...photo, caption } : photo
+                                              ),
+                                          }
+                                          : girder
+                                  ),
+                              };
+                          }
+                          // Check if it's Cross Girders
+                          else if (subComp.name === 'Cross Girders' && girderIndex !== undefined) {
+                              return {
+                                  ...subComp,
+                                  crossgirders: subComp.crossgirders.map((crossgirder, index) =>
+                                      index === girderIndex
+                                          ? {
+                                              ...crossgirder,
+                                              photos: crossgirder.photos.map((photo, index) =>
+                                                  index === photoIndex ? { ...photo, caption } : photo
+                                              ),
+                                          }
+                                          : crossgirder
+                                  ),
+                              };
+                          }
+                          // Handle captions for other subcomponents
+                          else {
+                              return {
+                                  ...subComp,
+                                  photos: subComp.photos.map((photo, index) =>
+                                      index === photoIndex ? { ...photo, caption } : photo
+                                  ),
+                              };
+                          }
+                      }
+                      return subComp;
+                  }),
+              }
+              : span
       )
-    );
-  };
+  );
+};
+
+  
 
   // Function to update notes for a subcomponent
   const updateNotes = (spanNumber, subComponentName, notes) => {
@@ -287,7 +345,13 @@ const VisualInspection = () => {
           <div key={span.spanNumber} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
             <h3>
             {getSpanName(span.spanNumber, spans.length)}
-              <button onClick={() => toggleSpan(span.spanNumber)} style={{ marginLeft: '10px' }}>
+              <button onClick={() => toggleSpan(span.spanNumber)} style={{
+                  alignSelf: 'flex-end',
+                        right: '0',          
+                        bottom: '0',         
+                        fontSize: '0.7em',   
+                        marginLeft: '10px',
+                }}>
                 {span.isExpanded ? '-' : '+'}
               </button>
             </h3>
@@ -353,19 +417,19 @@ const VisualInspection = () => {
                       <button onClick={() => addGirder(span.spanNumber, 'Cross Girders')}>
                         Add Cross Girder
                       </button>
-                      {subComp.girders && subComp.girders.map((crossGirder, crossGirderIndex) => (
-                        <div key={crossGirderIndex}>
-                          <h5>{crossGirder.name}</h5>
+                      {subComp.crossgirders && subComp.crossgirders.map((crossgirder, crossgirderIndex) => (
+                        <div key={crossgirderIndex}>
+                          <h5>{crossgirder.name}</h5>
                           <input
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
                               Array.from(e.target.files).forEach((file) =>
-                                addPhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, file)
+                                addPhoto(span.spanNumber, 'Cross Girders', crossgirderIndex, file)
                               )
                             }
                           />
-                          {crossGirder.photos && crossGirder.photos.map((photo, photoIndex) => (
+                          {crossgirder.photos && crossgirder.photos.map((photo, photoIndex) => (
                             <div key={photoIndex} style={{ marginTop: '10px', display: 'flex', alignItems: 'flex-start'}}>
                               <span style={{ marginRight: '10px' }}>{photoIndex + 1}.</span>
                               <img
@@ -378,10 +442,10 @@ const VisualInspection = () => {
                                 placeholder="Caption"
                                 value={photo.caption}
                                 onChange={(e) =>
-                                  updateCaption(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex, e.target.value)
+                                  updateCaption(span.spanNumber, 'Cross Girders', crossgirderIndex, photoIndex, e.target.value)
                                 }
                               />
-                              <button onClick={() => removePhoto(span.spanNumber, 'Cross Girders', crossGirderIndex, photoIndex)}>
+                              <button onClick={() => removePhoto(span.spanNumber, 'Cross Girders', crossgirderIndex, photoIndex)}>
                                 Remove Photo
                               </button>
                             </div>
@@ -438,9 +502,15 @@ const VisualInspection = () => {
                   type="text"
                   value={newSubComponentName}
                   onChange={(e) => setNewSubComponentName(e.target.value)}
-                  placeholder="Add new component"
+                  placeholder="Component Name"
                 />
-                <button onClick={() => addSubComponent(span.spanNumber)}>+ Component</button>
+                <button onClick={() => addSubComponent(span.spanNumber)} style={{
+                  alignSelf: 'flex-end',
+                        right: '0',          
+                        bottom: '0',         
+                        fontSize: '0.7em',   
+                        marginLeft: '10px',
+                }}>+ Component </button>
               </div>
             )}
           </div>
