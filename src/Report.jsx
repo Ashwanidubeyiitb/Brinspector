@@ -44,6 +44,15 @@ const Report = () => {
     
   }, []);
 
+  const [spans, setSpans] = useState([]);
+
+  useEffect(() => {
+    const data = localStorage.getItem('visualInspectionData');
+    if (data) {
+      setSpans(JSON.parse(data)); // Parse and set spans data from local storage
+    }
+  }, []);
+
   const convertObjectToArray = (data) => {
     let resultArray = [];
 
@@ -177,6 +186,91 @@ const reportArray = convertObjectToArray(formData);
     </div>
   ))}
 </div>
+
+<div>
+  <h2>VISUAL INSPECTION</h2>
+  {spans.length === 0 ? (
+    <p>No data available.</p>
+  ) : (
+    spans.map((span, spanIndex) => (
+      <div key={spanIndex} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
+        <h2>{`Span ${span.spanNumber}`}</h2>
+        {span.subComponents.map((subComp, subCompIndex) => (
+          <div key={subCompIndex} style={{ marginBottom: '20px' }}>
+            <h3>{subComp.name}</h3>
+            <p> {subComp.notes || 'No notes available.'}</p>
+
+            {/* Render photos with captions */}
+            {subComp.photos && subComp.photos.length > 0 && (
+              <div>
+                {subComp.photos.map((photo, photoIndex) => (
+                  <div key={photoIndex} style={{ marginBottom: '15px', maxWidth: '200px' }}>
+                    <img
+                      src={photo.image}
+                      alt={`Photo ${photoIndex + 1}`}
+                      style={{ maxWidth: '100%', display: 'block' }}
+                    />
+                    <p style={{ marginTop: '0', wordWrap: 'break-word' }}>
+                      {photo.caption || 'No caption provided.'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Render Girders and Cross Girders photos if applicable */}
+            {subComp.girders && subComp.girders.length > 0 && (
+              <div>
+                <h4>Girders</h4>
+                {subComp.girders.map((girder, girderIndex) => (
+                  <div key={girderIndex} style={{ marginBottom: '20px', maxWidth: '200px' }}>
+                    <h5>{girder.name}</h5>
+                    {girder.photos && girder.photos.map((photo, photoIndex) => (
+                      <div key={photoIndex} style={{ marginBottom: '15px', maxWidth: '200px' }}>
+                        <img
+                          src={photo.image}
+                          alt={`Girder Photo ${photoIndex + 1}`}
+                          style={{ maxWidth: '100%', display: 'block' }}
+                        />
+                        <p style={{ marginTop: '0', wordWrap: 'break-word' }}>
+                          {photo.caption || 'No caption provided.'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {subComp.crossgirders && subComp.crossgirders.length > 0 && (
+              <div>
+                <h4>Cross Girders</h4>
+                {subComp.crossgirders.map((crossgirder, crossgirderIndex) => (
+                  <div key={crossgirderIndex} style={{ marginBottom: '20px', maxWidth: '200px' }}>
+                    <h5>{crossgirder.name}</h5>
+                    {crossgirder.photos && crossgirder.photos.map((photo, photoIndex) => (
+                      <div key={photoIndex} style={{ marginBottom: '15px', maxWidth: '200px' }}>
+                        <img
+                          src={photo.image}
+                          alt={`Cross Girder Photo ${photoIndex + 1}`}
+                          style={{ maxWidth: '100%', display: 'block' }}
+                        />
+                        <p style={{ marginTop: '0', wordWrap: 'break-word' }}>
+                          {photo.caption || 'No caption provided.'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    ))
+  )}
+</div>
+
 
 
 

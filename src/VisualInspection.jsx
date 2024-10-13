@@ -54,6 +54,7 @@ const VisualInspection = () => {
   };
 
   const handleNextClick = () => {
+    localStorage.setItem('visualInspectionData', JSON.stringify(spans));
     navigate('/bridgeratingform');
   };
 
