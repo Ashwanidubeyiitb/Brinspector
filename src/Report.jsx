@@ -159,32 +159,46 @@ const reportArray = convertObjectToArray(formData);
     </div>
 
 
-    <div>
+  <div>
   <h2>PROFORMA FOR CONDITION SURVEY OF BRIDGE</h2>
-  {reportArray?.map((section, sectionIndex) => (
-    <div key={sectionIndex} style={{ marginBottom: '20px' }}>
-      <table style={{ border: '2px solid black', borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
-          <tr>
-            <th colSpan="3" style={{ textAlign: 'left', padding: '8px' }}>
-              <h3 style={{ margin: '0' }}>{sectionIndex + 1}. {section.section}</h3>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {section?.items.map((item, itemIndex) => (
-            <tr key={itemIndex} style={{ border: '1px solid black' }}>
-              <td style={{ border: '1px solid black', padding: '4px', width: '10%', textAlign: 'center' }}>
-                {sectionIndex + 1}.{itemIndex + 1}
-              </td>
-              <td style={{ border: '1px solid black', padding: '4px', width: '75%' }}>{item.label}</td> {/* Decreased width */}
-              <td style={{ border: '1px solid black', padding: '4px', width: '25%', textAlign: 'center' }}>{item.value}</td> {/* Increased width */}
+  {/* Check if reportArray exists and has items */}
+  {reportArray && reportArray.length > 0 ? (
+    reportArray.map((section, sectionIndex) => (
+      <div key={sectionIndex} style={{ marginBottom: '20px' }}>
+        <table style={{ border: '2px solid black', borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              <th colSpan="3" style={{ textAlign: 'left', padding: '8px' }}>
+                <h3 style={{ margin: '0' }}>{sectionIndex + 1}. {section.section}</h3>
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  ))}
+          </thead>
+          <tbody>
+            {/* Check if the section has items */}
+            {section?.items.length > 0 ? (
+              section.items.map((item, itemIndex) => (
+                <tr key={itemIndex} style={{ border: '1px solid black' }}>
+                  <td style={{ border: '1px solid black', padding: '4px', width: '10%', textAlign: 'center' }}>
+                    {sectionIndex + 1}.{itemIndex + 1}
+                  </td>
+                  <td style={{ border: '1px solid black', padding: '4px', width: '75%' }}>{item.label}</td>
+                  <td style={{ border: '1px solid black', padding: '4px', width: '25%', textAlign: 'center' }}>{item.value}</td>
+                </tr>
+              ))
+            ) : (
+              // If no items are found in the section, display this message
+              <tr>
+                <td colSpan="3" style={{ textAlign: 'center', padding: '10px' }}>-</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    ))
+  ) : (
+    // If reportArray is empty or undefined, display this message
+    <div>No data available</div>
+  )}
 </div>
 
 <div>
