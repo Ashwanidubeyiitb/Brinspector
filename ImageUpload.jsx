@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ImageUpload = () => {
-  const navigate = useNavigate(); // Get navigate function for navigation
+  const navigate = useNavigate();
   const [images, setImages] = useState({
-    mbiuOnSite : [],
+    mbiuOnSite: [],
     expansionJoints: [],
     drainageSpouts: [],
     bearings: [],
@@ -32,14 +32,23 @@ const ImageUpload = () => {
         ...prev,
         [category]: [...prev[category], ...newImages], // Append new images to the existing ones
       };
-      // Save updated images to local storage
+      localStorage.setItem('bridgeImages', JSON.stringify(updatedImages));
+      return updatedImages;
+    });
+  };
+
+  const handleRemoveImage = (category, index) => {
+    setImages(prev => {
+      const updatedImages = {
+        ...prev,
+        [category]: prev[category].filter((_, i) => i !== index), // Remove the selected image
+      };
       localStorage.setItem('bridgeImages', JSON.stringify(updatedImages));
       return updatedImages;
     });
   };
 
   const handleSubmit = () => {
-    // Navigate to the Report component
     navigate('/ChainageData');
   };
 
@@ -54,14 +63,18 @@ const ImageUpload = () => {
               type="file"
               accept="image/*"
               onChange={(event) => handleFileChange(event, category)}
-              multiple // Allow multiple file uploads
+              capture="environment" // Opens the camera on mobile devices but retains the "Choose file" option
+              multiple
             />
           </label>
           {images[category].length > 0 && (
             <div>
               <h4>Preview:</h4>
               {images[category].map((image, index) => (
-                <img key={index} src={image} alt={`${category} ${index}`} style={{ width: '200px', height: 'auto', marginRight: '10px' }} />
+                <div key={index} style={{ marginBottom: '10px' }}>
+                  <img src={image} alt={`${category} ${index}`} style={{ width: '200px', height: 'auto', display: 'block', marginBottom: '5px' }} />
+                  <button onClick={() => handleRemoveImage(category, index)}>Remove</button>
+                </div>
               ))}
             </div>
           )}

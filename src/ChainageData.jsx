@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 const ChainageData = () => {
   const [chainage, setChainage] = useState('');
-  const [pdfFile, setPdfFile] = useState(null);
-  const navigate = useNavigate();
+  const [pdfFiles, setPdfFiles] = useState([]); // Store multiple file objects (name and URL)
   const [selectedBridgeType, setSelectedBridgeType] = useState('');
+  const navigate = useNavigate();
 
   const handleBridgeTypeChange = (event) => {
     setSelectedBridgeType(event.target.value);
@@ -21,13 +21,24 @@ const ChainageData = () => {
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      const fileUrl = URL.createObjectURL(file);
-      setPdfFile(fileUrl); // Save URL to state
-    } else {
-      alert('Please upload a valid PDF file.');
-    }
+    const files = Array.from(event.target.files); // Get the selected files as an array
+
+    const validFiles = files.filter(file => file.type === 'application/pdf');
+
+    // Generate URLs for valid PDF files and add them to the list
+    const newPdfFiles = validFiles.map(file => ({
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+
+    // Update the state by adding the new files to the existing ones
+    setPdfFiles(prevFiles => [...prevFiles, ...newPdfFiles]);
+  };
+
+  const removeFile = (indexToRemove) => {
+    setPdfFiles(prevFiles =>
+      prevFiles.filter((_, index) => index !== indexToRemove) // Remove file at the given index
+    );
   };
 
   const handleSubmit = () => {
@@ -35,7 +46,7 @@ const ChainageData = () => {
     const bridgeData = {
       chainage,
       bridgeType: selectedBridgeType,
-      pdfFileUrl: pdfFile || null, // Use null if no file is uploaded
+      pdfFiles: pdfFiles.length ? pdfFiles : null, // Use null if no files are uploaded
     };
 
     // Store the object as a JSON string in local storage under a single key
@@ -82,15 +93,37 @@ const ChainageData = () => {
       <br />
 
       <label style={{ marginBottom: '10px' }}>
-        Import PDF File:
+        Import PDF File(s):
         <input
           type="file"
           accept="application/pdf"
+          multiple // Allow multiple files to be selected at once
           onChange={handleFileChange}
         />
       </label>
-
       <br />
+
+      {pdfFiles.length > 0 && (
+        <div>
+        <h4>Uploaded Files:</h4>
+              {/* Show file count only if files are uploaded */}
+              {pdfFiles.length > 0 && (
+              <span style={{ marginLeft: '10px' }}>
+              {pdfFiles.length} files uploaded
+              </span>
+              )}
+          <ul>
+            {pdfFiles.map((file, index) => (
+              <li key={index}>
+                {file.name}{' '}
+                <button onClick={() => removeFile(index)} style={{ marginLeft: '10px' }}>
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button onClick={handleSubmit} style={{ marginTop: '10px' }}>Next</button>
     </div>

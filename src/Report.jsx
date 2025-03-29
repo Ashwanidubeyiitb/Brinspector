@@ -99,7 +99,9 @@ const reportArray = convertObjectToArray(formData);
   const { condition, starRating } = getBridgeConditionAndRating(ratingData.BHI);
 
   return (
-    <div style={{ padding: '20px' }}>
+    
+    <div 
+    style={{ padding: '20px' }}>
       <h1>Bridge Inspection Report</h1>
       {/* Project Information Section */}
       <div style={{ padding: '20px' }}>
@@ -137,26 +139,43 @@ const reportArray = convertObjectToArray(formData);
     </div>
   
     <div>
-      <h2>BRIDGE DATA</h2>
-      {bridgeData ? (
-        <div>
-          <p><strong>Structure Chainage (km):</strong> {bridgeData.chainage}</p>
-          <p><strong>Bridge Type:</strong> {bridgeData.bridgeType}</p>
-          {bridgeData.pdfFileUrl ? (
-            <p>
-              <strong>PDF File:</strong> 
-              <a href={bridgeData.pdfFileUrl} target="_blank" rel="noopener noreferrer">
-                View PDF
-              </a>
-            </p>
-          ) : (
-            <p><strong>PDF File:</strong> No file uploaded</p>
-          )}
-        </div>
-      ) : (
-        <p>No bridge data available.</p>
-      )}
-    </div>
+    <h2>BRIDGE DATA</h2>
+    {bridgeData ? (
+      <div>
+        <p><strong>Structure Chainage (km):</strong> {bridgeData.chainage}</p>
+        <p><strong>Bridge Type:</strong> {bridgeData.bridgeType}</p>
+        {bridgeData.pdfFiles && bridgeData.pdfFiles.length > 0 ? (
+          <div style={{ display: 'flex' }}>
+            <strong>Drawing Files:</strong>
+            <div style={{ marginLeft: '10px' }}>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none' }}>
+                {bridgeData.pdfFiles.map((file, index) => (
+                  <li key={index} style={{ marginBottom: '5px' }}>
+                    <a 
+                      href={file.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        textDecoration: 'underline', 
+                        fontStyle: 'italic', 
+                        color: 'black' 
+                      }}
+                    >
+                      {file.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <p><strong>PDF Files:</strong> No files uploaded</p>
+        )}
+      </div>
+    ) : (
+      <p>No bridge data available.</p>
+    )}
+  </div>
 
 
   <div>
@@ -285,17 +304,23 @@ const reportArray = convertObjectToArray(formData);
   )}
 </div>
 
-
-
-
-
-
       {/* Display overall Bridge Health Index (BHI) */}
       <h2>Bridge Health Index (BHI): {ratingData.BHI.toFixed(2)}</h2>
 
       {/* Display Condition State and Bridge Star Rating */}
       <h3>Condition state of Bridge: {condition}</h3>
       <h3>Bridge Star Rating: {starRating}</h3>
+
+      {/* Footer */}
+      <footer className="report-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' }}>
+      <div className="footer-logos" style={{ marginRight: 'auto' }}>
+      <img src="/images/BRInspector.jpg" alt="BRInspector Logo" style={{ height: '50px' }} />
+      </div>
+      <div className="footer-logos" style={{ marginLeft: 'auto' }}>
+      <img src="/images/CRRI.png" alt="CRRI Logo" style={{ height: '50px' }} />
+      </div>
+      <p>&copy;</p>
+      </footer>
       
     </div>
   );
